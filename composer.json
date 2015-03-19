@@ -1,0 +1,22 @@
+{
+    "name": "cookbook/core",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nikola Plavsic",
+            "email": "nikolaplavsic@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.5.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cookbook\\Core\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
