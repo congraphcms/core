@@ -8,14 +8,16 @@
         }
     ],
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=5.4.0",
+        "illuminate/validation": "5.*",
+        "illuminate/events": "5.*"
     },
     "require-dev": {
         "phpunit/phpunit": "4.5.*"
     },
     "autoload": {
         "psr-4": {
-            "Cookbook\\Core\\": "src/"
+            "Cookbook\\Core\\": ""
         }
     },
     "minimum-stability": "dev"
