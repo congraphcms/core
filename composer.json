@@ -1,6 +1,7 @@
 {
     "name": "cookbook/core",
     "description": "",
+    "license": "MIT",
     "authors": [
         {
             "name": "Nikola Plavsic",
