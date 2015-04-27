@@ -104,7 +104,7 @@ trait ErrorManagerTrait
 	 * 
 	 * @return void
 	 */      
-	public function setErrors($messages = []])
+	public function setErrors($messages = [])
 	{
 		$this->errors = new MessageBag();
 		$this->addErrors($messages);
