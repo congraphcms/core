@@ -18,11 +18,13 @@ use Illuminate\Support\MessageBag;
  * Gives class ability to add, remove and pass errors
  * with use of Illuminate\Support\MessageBag as error messages holder.
  * 
- * @author  Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package Cookbook/Core
- * @since v0.4
- * @copyright  Vizioart PR Velimir Matic
- * @version  v0.4
+ * @uses 		Illuminate\Support\MessageBag
+ * 
+ * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
+ * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
+ * @package 	Cookbook/Core
+ * @since 		0.1.0-alpha
+ * @version  	0.1.0-alpha
  */
 trait ErrorManagerTrait
 {
@@ -35,15 +37,64 @@ trait ErrorManagerTrait
 	public $errors;
 
 	/**
+	 * Error key
+	 * 
+	 * array key for error messages
+	 *
+	 * @var string
+	 */
+	protected $errorKey;
+
+	/**
+	 * Set error key
+	 * 
+	 * @param string $key
+	 * 
+	 * @return void
+	 */ 
+	public function setErrorKey($key = null)
+	{
+		$this->errorKey = $key;
+	}
+
+	/**
+	 * Nest messages according to error key
+	 * 
+	 * @param array $messages
+	 * 
+	 * @return array
+	 */ 
+	protected function resolveErrorKey($messages = [])
+	{
+		// if there is no error key defined leave messages as they were
+		if(empty($this->errorKey))
+		{
+			return $messages;
+		}
+
+		// keys are divided on every .
+		$keys = explode('.', $this->errorKey);
+
+		// we need to reverse this array for sorting
+		$keys = array_reverse($keys);
+
+		foreach ($keys as $errorKey) {
+			$messages = array($errorKey => $messages);
+		}
+
+		return $messages;
+	}
+
+	/**
 	 * Add messages to error message bag
 	 * 
 	 * @param array $messages (optional)
 	 * 
 	 * @return boolean
 	 */      
-	public function addErrors($messages = array())
+	public function addErrors($messages = [])
 	{
-		return $this->errors->merge($messages);
+		return $this->errors->merge($this->resolveErrorKey($messages));
 	}
 
 	/**
@@ -53,7 +104,7 @@ trait ErrorManagerTrait
 	 * 
 	 * @return void
 	 */      
-	public function setErrors($messages = array())
+	public function setErrors($messages = []])
 	{
 		$this->errors = new MessageBag();
 		$this->addErrors($messages);

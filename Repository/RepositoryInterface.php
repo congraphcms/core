@@ -16,11 +16,11 @@ namespace Cookbook\Core\Repository;
  * These are just basic functions that any repository should have.
  * This interface will be implemented by abstract repository.
  * 
- * @author  Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package Cookbook/Core
- * @since v0.4
- * @copyright  Vizioart PR Velimir Matic
- * @version  v0.4
+ * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
+ * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
+ * @package 	Cookbook/Core
+ * @since 		0.1.0-alpha
+ * @version  	0.1.0-alpha
  */
 interface RepositoryInterface
 {

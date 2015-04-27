@@ -20,18 +20,20 @@ use Illuminate\Database\Connection;
  * Allowing extra logic to be bound to any number of repository (domain) methods.
  * This logic should be implemented inside of proxy method
  * 
- * @author  Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package Cookbook/Core
- * @since v0.4
- * @copyright  Vizioart PR Velimir Matic
- * @version  v0.4
+ * @uses   		Illuminate\Database\Connection
+ * 
+ * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
+ * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
+ * @package 	Cookbook/Core
+ * @since 		0.1.0-alpha
+ * @version  	0.1.0-alpha
  */
 abstract class AbstractRepository implements RepositoryInterface
 {
 	/**
 	 * The database connection to use.
 	 *
-	 * @var \Illuminate\Database\Connection
+	 * @var Illuminate\Database\Connection
 	 */
 	protected $db;
 

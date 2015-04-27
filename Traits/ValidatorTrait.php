@@ -16,13 +16,13 @@ use Illuminate\Contracts\Validation\Factory as ValidatorFactoryContract;
  * Trait for validating input parameters 
  * uses Laravel Validator for validation
  * 
- * @uses 		Illuminate\Support\Facades\Validator
+ * @uses 		Illuminate\Contracts\Validation\Factory
  * 
- * @author 		Nikola Plavšić <nikolaplavsic@gmail.com>
+ * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
+ * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @package 	Cookbook/Core
- * @since 		v0.4
- * @copyright 	Vizioart PR Velimir Matic
- * @version 	v0.4
+ * @since 		0.1.0-alpha
+ * @version  	0.1.0-alpha
  */
 trait ValidatorTrait
 {
@@ -36,14 +36,6 @@ trait ValidatorTrait
 	 */
 	protected $validatorFactory;
 
-	/**
-	 * Error key
-	 * 
-	 * array key for error messages
-	 *
-	 * @var string
-	 */
-	protected $errorKey;
 
 	/**
 	 * Validate params by given rules
@@ -83,13 +75,7 @@ trait ValidatorTrait
 			// get validator errors
 			$messages = $validator->messages();
 
-			if(!empty($this->errorKey))
-			{
-				// add errors to bag under setted error key
-				$this->addErrors(array($this->errorKey => $messages));
-
-				return false;
-			}
+			
 
 			// add errors to bag
 			$this->addErrors($messages);
@@ -112,17 +98,6 @@ trait ValidatorTrait
 	 */ 
 	public function setValidatorFactory(ValidatorFactoryContract $factory){
 		$this->validatorFactory = $factory;
-	}
-
-	/**
-	 * Set error key
-	 * 
-	 * @param string $key
-	 * 
-	 * @return void
-	 */ 
-	public function setErrorKey($key = null){
-		$this->errorKey = $key;
 	}
 
 	/**
