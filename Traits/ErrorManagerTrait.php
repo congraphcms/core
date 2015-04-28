@@ -94,6 +94,12 @@ trait ErrorManagerTrait
 	 */      
 	public function addErrors($messages = [])
 	{
+		// check if messages are an array
+		if(! is_array($messages) )
+		{
+			$messages = [$messages];
+		}
+
 		return $this->errors->merge($this->resolveErrorKey($messages));
 	}
 

@@ -28,7 +28,7 @@ use Illuminate\Database\Connection;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-abstract class AbstractRepository implements RepositoryInterface
+abstract class AbstractRepository implements RepositoryContract
 {
 	/**
 	 * The database connection to use.
@@ -299,9 +299,9 @@ abstract class AbstractRepository implements RepositoryInterface
 	/**
 	 * Abstract definition of RepositoryInterface methods
 	 */
-	protected abstract function _create($model);
+	abstract protected function _create($model);
 
-	protected abstract function _update($model);
+	abstract protected function _update($model);
 
-	protected abstract function _delete($id);
+	abstract protected function _delete($id);
 }

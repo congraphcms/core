@@ -22,7 +22,7 @@ namespace Cookbook\Core\Repository;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-interface RepositoryInterface
+interface RepositoryContract
 {
 	
 	/**
