@@ -11,6 +11,7 @@
 namespace Cookbook\Core\Repository;
 
 use Illuminate\Database\Connection;
+use Cookbook\Contracts\Core\RepositoryContract;
 
 /**
  * Abstract repository
@@ -20,6 +21,7 @@ use Illuminate\Database\Connection;
  * Allowing extra logic to be bound to any number of repository (domain) methods.
  * This logic should be implemented inside of proxy method
  * 
+ * @uses   		Cookbook\Contracts\Core\RepositoryContract
  * @uses   		Illuminate\Database\Connection
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
@@ -30,6 +32,8 @@ use Illuminate\Database\Connection;
  */
 abstract class AbstractRepository implements RepositoryContract
 {
+
+
 	/**
 	 * The database connection to use.
 	 *
@@ -206,7 +210,8 @@ abstract class AbstractRepository implements RepositoryContract
 	 * 
 	 * @return void
 	 */
-	protected function beforeProxy($method, $args){
+	protected function beforeProxy($method, $args)
+	{
 		// if method is defined as transaction method
 		if
 		(	empty($this->transactionMethods) || 
@@ -229,7 +234,8 @@ abstract class AbstractRepository implements RepositoryContract
 	 * 
 	 * @return void
 	 */
-	protected function afterProxy($method, $args){
+	protected function afterProxy($method, $args)
+	{
 		// if method is defined as transaction method
 		if
 		(	empty($this->transactionMethods) || 
@@ -251,7 +257,8 @@ abstract class AbstractRepository implements RepositoryContract
 	 * 
 	 * @return mixed
 	 */
-	public function create($model){
+	public function create($model)
+	{
 		// arguments for private method 
 		$args = func_get_args();
 
@@ -268,7 +275,8 @@ abstract class AbstractRepository implements RepositoryContract
 	 * 
 	 * @return mixed
 	 */
-	public function update($model){
+	public function update($model)
+	{
 		// arguments for private method 
 		$args = func_get_args();
 
@@ -285,7 +293,8 @@ abstract class AbstractRepository implements RepositoryContract
 	 * 
 	 * @return mixed
 	 */
-	public function delete($id){
+	public function delete($id)
+	{
 		// arguments for private method 
 		$args = func_get_args();
 

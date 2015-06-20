@@ -34,7 +34,7 @@ trait ErrorManagerTrait
 	 *
 	 * @var MessageBag
 	 */
-	public $errors;
+	protected $errors;
 
 	/**
 	 * Error key
@@ -52,7 +52,7 @@ trait ErrorManagerTrait
 	 * 
 	 * @return void
 	 */ 
-	public function setErrorKey($key = null)
+	protected function setErrorKey($key = null)
 	{
 		$this->errorKey = $key;
 	}

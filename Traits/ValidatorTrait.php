@@ -46,7 +46,7 @@ trait ValidatorTrait
 	 * 
 	 * @return boolean
 	 */      
-	public function validateParams(array &$params, array $rules, $clean = false)
+	protected function validateParams(array &$params, array $rules, $clean = false)
 	{
 
 		if($clean)
