@@ -12,6 +12,7 @@
         "php": ">=5.4.0",
         "illuminate/validation": "5.*",
         "illuminate/events": "5.*",
+        "illuminate/routing": "5.*",
         "cookbook/contracts": "dev-master"
     },
     "require-dev": {

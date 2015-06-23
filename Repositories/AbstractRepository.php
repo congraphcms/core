@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Repository;
+namespace Cookbook\Core\Repositories;
 
 use Illuminate\Database\Connection;
 use Cookbook\Contracts\Core\RepositoryContract;
