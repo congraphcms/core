@@ -13,6 +13,7 @@
         "illuminate/validation": "5.*",
         "illuminate/events": "5.*",
         "illuminate/routing": "5.*",
+        "illuminate/contracts": "5.*",
         "cookbook/contracts": "dev-master"
     },
     "require-dev": {
