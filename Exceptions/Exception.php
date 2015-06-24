@@ -28,4 +28,9 @@ use Cookbook\Contracts\Core\ErrorManagementContract;
 class Exception extends PHPException implements ErrorManagementContract
 {
 	use ErrorManagerTrait;
+
+	public function __construct($messages = [])
+	{
+		$this->setErrors($messages);
+	}
 }
