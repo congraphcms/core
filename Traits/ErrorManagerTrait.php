@@ -95,7 +95,7 @@ trait ErrorManagerTrait
 	public function addErrors($messages = [])
 	{
 		// check if messages are an array
-		if(! is_array($messages) )
+		if(! is_array($messages) && ! $messages instanceof MessageProvider)
 		{
 			$messages = (array) $messages;
 		}
