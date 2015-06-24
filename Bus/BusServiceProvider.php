@@ -21,7 +21,7 @@ class BusServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton('Cookbook\Core\Bus\CommandDispatcher', function ($app) {
-            return new Dispatcher($app, function () use ($app) {
+            return new CommandDispatcher($app, function () use ($app) {
                 return $app['Illuminate\Contracts\Queue\Queue'];
             });
         });
