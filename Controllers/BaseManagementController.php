@@ -12,6 +12,7 @@ namespace Cookbook\Core\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Contracts\Bus\Dispatcher;
+use Illuminate\Contracts\Routing\ResponseFactory;
 
 /**
  * AttributeController class
@@ -29,9 +30,12 @@ use Illuminate\Contracts\Bus\Dispatcher;
 class BaseManagementController extends Controller
 {
 	public $bus;
+
+	public $response;
 	
-	public function __construct(Dispatcher $bus)
+	public function __construct(Dispatcher $bus, ResponseFactory $response)
 	{
 		$this->bus = $bus;
+		$this->response = $response;
 	}
 }
