@@ -71,7 +71,7 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	 */
 	public function validate($command)
 	{
-		$validator = $this->getValidatorClass($command);
+		$validator = $this->container->make($this->getValidatorClass($command));
 		$method = $this->getValidatorMethod($command);
 
 		call_user_func([$validator, $method], $command);
