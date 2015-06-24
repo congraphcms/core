@@ -16,6 +16,12 @@
         "illuminate/contracts": "5.*",
         "cookbook/contracts": "dev-master"
     },
+    "repositories": [
+        {
+            "type": "git",
+            "url":  "git@bitbucket.org:cookbookcms/contracts.git"
+        }
+    ],
     "require-dev": {
         "phpunit/phpunit": "4.5.*"
     },

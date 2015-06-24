@@ -12,7 +12,7 @@ namespace Cookbook\Core\Bus;
 
 use Closure;
 use Illuminate\Bus\Dispatcher;
-use Cookbook\Contracts\Core\ValidationCommandDispatcher;
+use Cookbook\Contracts\Core\ValidationCommandDispatcherContract;
 use Cookbook\Contracts\Core\SelfValidating;
 
 /**
@@ -28,7 +28,7 @@ use Cookbook\Contracts\Core\SelfValidating;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-class CommandDispatcher extends Dispatcher implements ValidationCommandDispatcher
+class CommandDispatcher extends Dispatcher implements ValidationCommandDispatcherContract
 {
 
 	/**
