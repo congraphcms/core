@@ -97,7 +97,7 @@ trait ErrorManagerTrait
 		// check if messages are an array
 		if(! is_array($messages) )
 		{
-			$messages = [$messages];
+			$messages = (array) $messages;
 		}
 
 		return $this->errors->merge($this->resolveErrorKey($messages));
