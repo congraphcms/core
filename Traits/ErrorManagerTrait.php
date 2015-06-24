@@ -52,7 +52,7 @@ trait ErrorManagerTrait
 	 * 
 	 * @return void
 	 */ 
-	protected function setErrorKey($key = null)
+	public function setErrorKey($key = null)
 	{
 		$this->errorKey = $key;
 	}
