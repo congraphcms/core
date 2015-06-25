@@ -12,8 +12,6 @@ namespace Cookbook\Core\Repositories;
 
 use Illuminate\Database\Connection;
 use Cookbook\Contracts\Core\RepositoryContract;
-use Cookbook\Core\Traits\ValidatorTrait;
-use Illuminate\Contracts\Validation\Factory as ValidatorFactory;
 
 /**
  * Abstract repository
@@ -36,7 +34,6 @@ use Illuminate\Contracts\Validation\Factory as ValidatorFactory;
  */
 abstract class AbstractRepository implements RepositoryContract
 {
-	use ValidatorTrait;
 
 	/**
 	 * The database connection to use.
@@ -72,15 +69,9 @@ abstract class AbstractRepository implements RepositoryContract
 	 * 
 	 * @param \Illuminate\Database\Connection $db
 	 */
-	public function __construct(Connection $db, ValidatorFactory $validatorFactory)
+	public function __construct(Connection $db)
 	{
 		$this->setConnection($db);
-
-		// set the error message bag
-		$this->setErrors();
-
-		// set the validator factory
-		$this->setValidatorFactory($validatorFactory);
 	}
 
 	/**
