@@ -98,8 +98,9 @@ class Exception extends PHPException implements ErrorManagementContract
 		}
 
 		$newKey = (empty($key))? '/' : $key;
-
-		return [$newKey => (array)$errors];
+		var_dump('errros');
+		var_dump([$newKey => $errors]);
+		return [$newKey => $errors];
 		
 	}
 }
