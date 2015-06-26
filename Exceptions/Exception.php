@@ -44,8 +44,6 @@ class Exception extends PHPException implements ErrorManagementContract
 	protected function compileErrors()
 	{
 		$flatErrors = $this->getFlatErrors();
-		var_dump('flat errros');
-		var_dump($flatErrors);
 
 		$compiledErrors = [];
 
@@ -59,11 +57,9 @@ class Exception extends PHPException implements ErrorManagementContract
 				$compiledError['message'] = $message;
 				$compiledError['pointer'] = $errorKey;
 
-				$compileErrors[] = $compiledError;
+				$compiledErrors[] = $compiledError;
 			}
 		}
-		var_dump('compiled errros');
-		var_dump($compiledErrors);
 		return $compiledErrors;
 	}
 
@@ -80,15 +76,11 @@ class Exception extends PHPException implements ErrorManagementContract
 		if(is_assoc($errors))
 		{
 			$flatErrors = [];
-			var_dump('iterate errros');
-			var_dump($errors);
 			foreach ($errors as $errorKey => $error) 
 			{
 				$newKey = (empty($key))? '/' . $errorKey : $key . '/' . $errorKey;
 				$flatErrors = array_merge_recursive($flatErrors, $this->loopErrors($error, $newKey));
 			}
-			var_dump('iterate flaterrros');
-			var_dump($flatErrors);
 			return $flatErrors;
 		}
 
@@ -98,8 +90,6 @@ class Exception extends PHPException implements ErrorManagementContract
 		}
 
 		$newKey = (empty($key))? '/' : $key;
-		var_dump('errros');
-		var_dump([$newKey => $errors]);
 		return [$newKey => $errors];
 		
 	}
