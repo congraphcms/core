@@ -53,7 +53,7 @@ class Exception extends PHPException implements ErrorManagementContract
 			{
 				$compiledError = [];
 				$compiledError['code'] = $this->code;
-				$compiledError['status'] = intval(strval($this->code), 0, 3);
+				$compiledError['status'] = intval(substr(strval($this->code), 0, 3));
 				$compiledError['message'] = $message;
 				$compiledError['pointer'] = $errorKey;
 
