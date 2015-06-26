@@ -29,11 +29,20 @@ class Exception extends PHPException implements ErrorManagementContract
 {
 	use ErrorManagerTrait;
 
-	public function __construct($messages = [], $code = 500)
+	/**
+	 * Array of previous exceptions
+	 * 
+	 * @var Array
+	 */
+	protected $previous;
+
+	public function __construct($messages = [], $code = 500, $previous = [])
 	{
 		$this->setErrors($messages);
 
 		$this->code = $code;
+
+		$this->previous = $previous;
 	}
 
 	public function toArray()
@@ -41,7 +50,7 @@ class Exception extends PHPException implements ErrorManagementContract
 		return $this->compileErrors();
 	}
 
-	protected function compileErrors()
+	public function compileErrors()
 	{
 		$flatErrors = $this->getFlatErrors();
 
@@ -60,6 +69,17 @@ class Exception extends PHPException implements ErrorManagementContract
 				$compiledErrors[] = $compiledError;
 			}
 		}
+
+		if( ! empty($this->previous) && is_array($this->previous) )
+		{
+			foreach ($previous as $exception) {
+				if($exception instanceOf Exception)
+				{
+					$compiledErrors = array_merge_recursive($compiledErrors, $exception->compileErrors());
+				}
+			}
+		}
+		
 		return $compiledErrors;
 	}
 

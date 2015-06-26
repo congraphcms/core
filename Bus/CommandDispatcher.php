@@ -14,6 +14,7 @@ use Closure;
 use Illuminate\Bus\Dispatcher;
 use Cookbook\Contracts\Core\ValidationCommandDispatcherContract;
 use Cookbook\Contracts\Core\SelfValidating;
+use Illuminate\Support\Facades\Event;
 
 /**
  * CommandDispatcher class
@@ -45,6 +46,20 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	 */
 	protected $validatorMapper;
 
+	/**
+	 * All of the command-to-event mappings.
+	 *
+	 * @var array
+	 */
+	protected $eventMappings = [];
+
+	/**
+	 * The fallback event mapping Closure.
+	 *
+	 * @var \Closure
+	 */
+	protected $eventMapper;
+
 
 	/**
 	 * Dispatch a command to its appropriate handler.
@@ -56,10 +71,150 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	 */
 	public function dispatch($command, Closure $afterResolving = null)
 	{
+		// fire any registered events before command
+		$this->fireBeforeCommandEvents($command);
+
+		// validate command with registered validator
 		$this->validate($command);
 		
-		parent::dispatch($command, $afterResolving);
+		// dispatch the command
+		$result = parent::dispatch($command, $afterResolving);
 		
+		// fire any registered events after command
+		$this->fireAfterCommandEvents($command, $result);
+
+		// return the handler result
+		return $result;
+	}
+
+	/**
+	 * Fire registered before command events
+	 *
+	 * @param  mixed  $command
+	 * 
+	 * @return void
+	 */
+	protected function fireBeforeCommandEvents($command)
+	{
+		// get events classes
+		$events = $this->getBeforeEvents($command);
+
+		// if no registered events return
+		if( $event === false )
+		{
+			return;
+		}
+
+		if( ! is_array($events) )
+		{
+			$events = [$events];
+		}
+
+
+		foreach ($events as $event) {
+			// fire the events
+			Event::fire( new $event($command) );
+		}
+		
+	}
+
+	/**
+	 * Fire registered after command events
+	 *
+	 * @param  mixed  $command
+	 * 
+	 * @return void
+	 */
+	protected function fireAfterCommandEvents($command, &$result)
+	{
+		// get event class
+		$events = $this->getAfterEvents($command);
+
+		// if no registered events return
+		if( $events === false )
+		{
+			return;
+		}
+
+		if( ! is_array($events) )
+		{
+			$events = [$events];
+		}
+
+
+		foreach ($events as $event) {
+			// fire the events
+			Event::fire( new $event($command, $result) );
+		}
+	}
+
+	/**
+	 * Get the events classes for fireing before the given command.
+	 *
+	 * @param  mixed  $command
+	 * @return string
+	 */
+	public function getBeforeEvents($command)
+	{
+		return $this->getCommandEvents($command, 'before');
+	}
+
+	/**
+	 * Get the events classes for fireing after the given command.
+	 *
+	 * @param  mixed  $command
+	 * @return string
+	 */
+	public function getAfterEvents($command)
+	{
+		return $this->getCommandEvents($command, 'after');
+	}
+
+	/**
+	 * Get the events classes for the given command.
+	 *
+	 * @param  mixed  	$command
+	 * @param  string  	$beforeOrAfter
+	 * @return string
+	 */
+	protected function getCommandEvents($command, $beforeOrAfter)
+	{
+		// get command class name
+		$commandName = get_class($command);
+
+		// if there is registered event
+		if ( isset($this->eventMappings[$commandName]) && isset($this->eventMappings[$commandName][$beforeOrAfter]) )
+		{
+			return $this->eventMappings[$commandName][$beforeOrAfter];
+		}
+		elseif ($this->eventMapper)
+		{
+			return call_user_func($this->eventMapper, $command);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Register command-to-event mappings.
+	 *
+	 * @param  array  $events
+	 * @return void
+	 */
+	public function mapEvents(array $events)
+	{
+		$this->eventMappings = array_merge_recursive($this->eventMappings, $events);
+	}
+
+	/**
+	 * Register a fallback eventMapper callback.
+	 *
+	 * @param  \Closure  $mapper
+	 * @return void
+	 */
+	public function mapEventsUsing(Closure $mapper)
+	{
+		$this->eventMapper = $mapper;
 	}
 
 	/**
@@ -128,7 +283,7 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 			return $this->getValidatorMapperSegment($command, $segment);
 		}
 
-		throw new InvalidArgumentException("No validator registered for command [{$className}]");
+		return false;
 	}
 
 	/**
