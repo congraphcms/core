@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Event;
+namespace Cookbook\Core\Events;
 
 /**
  * AfterCommandEvent class

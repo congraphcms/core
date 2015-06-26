@@ -8,16 +8,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Event;
-
-use Illuminate\Queue\SerializesModels;
+namespace Cookbook\Core\Events;
 
 /**
- * CommandEvent class
+ * BeforeCommandEvent class
  * 
- * Cookbook Command Event
- * 
- * @uses  		Illuminate\Queue\SerializesModels
+ * Cookbook Before Command Event
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
@@ -25,23 +21,7 @@ use Illuminate\Queue\SerializesModels;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-abstract class CommandEvent
+class BeforeCommandEvent extends CommandEvent
 {
-	/**
-	 * Command that called this event
-	 * 
-	 * @var mixed
-	 */
-	public $command;
-
-
-	/**
-	 * CommandEvent constructor
-	 * 
-	 * @param mixed $command
-	 */
-	public function __construct($command)
-	{
-		$this->command = $command;
-	}
+	
 }

@@ -58,7 +58,7 @@ class CoreServiceProvider extends ServiceProvider {
 
 		// Core Event
 		// -----------------------------------------------------------------------------
-		$this->app->register('Cookbook\Core\Event\EventServiceProvider');
+		$this->app->register('Cookbook\Core\Events\EventsServiceProvider');
 
 		
 	}

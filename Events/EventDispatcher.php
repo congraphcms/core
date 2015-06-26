@@ -8,16 +8,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Event;
+namespace Cookbook\Core\Events;
 
-use Illuminate\Event\Dispatcher;
+use Illuminate\Events\Dispatcher;
 
 /**
  * EventDispatcher class
  * 
  * Cookbook Event Dispatcher
  * 
- * @uses  		Illuminate\Event\Dispatcher
+ * @uses  		Illuminate\Events\Dispatcher
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>

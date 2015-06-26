@@ -1,10 +1,10 @@
 <?php
 
-namespace Cookbook\Core\Event;
+namespace Cookbook\Core\Events;
 
 use Illuminate\Support\ServiceProvider;
 
-class EventServiceProvider extends ServiceProvider
+class EventsServiceProvider extends ServiceProvider
 {
 	/**
 	 * Indicates if loading of the provider is deferred.
