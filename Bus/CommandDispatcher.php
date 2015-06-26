@@ -100,7 +100,7 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 		$events = $this->getBeforeEvents($command);
 
 		// if no registered events return
-		if( $event === false )
+		if( $events === false )
 		{
 			return;
 		}
