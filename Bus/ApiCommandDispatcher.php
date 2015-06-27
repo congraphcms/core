@@ -48,7 +48,7 @@ class ApiCommandDispatcher
 	 * 
 	 * @return mixed
 	 */
-	public function dispatch($command, Closure $afterResolving = null)
+	public function dispatch($command, Closure $afterResolving = null, $okStatus = 200)
 	{
 		try
 		{
@@ -61,7 +61,7 @@ class ApiCommandDispatcher
 		}
 
 		// return the handler result
-		return $this->createResponse($result);
+		return $this->createResponse(['data' => $result], $okStatus);
 	}
 
 	protected function handleException(Exception $e)
