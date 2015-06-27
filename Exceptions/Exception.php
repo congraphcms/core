@@ -130,5 +130,7 @@ class Exception extends PHPException implements ErrorManagementContract
 
 			return 0;
 		});
+
+		return $errors;
 	}
 }
