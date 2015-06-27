@@ -46,11 +46,9 @@ class ApiCommandDispatcher extends CommandDispatcher
 		{
 			// dispatch the command
 			$result = parent::dispatch($command, $afterResolving);
-			dd($result);
 		}
 		catch(Exception $e)
 		{
-			dd($e);
 			return $this->handleException($e);
 		}
 
@@ -143,6 +141,8 @@ class ApiCommandDispatcher extends CommandDispatcher
 				$response->header($key, $value, true);
 			}
 		}
+
+		return $response;
 	}
 
 }
