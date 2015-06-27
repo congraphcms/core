@@ -118,11 +118,11 @@ class ApiCommandDispatcher
 			}
 
 			// get http status code group
-			$statusGroup = floor($error['status'], -2);
+			$statusGroup = floor($error['status'] / 100) * 100;
 
 			// check if group is lower then previous error
 			// if it is break
-			if($statusGroup < floor($statusGeneral, -2))
+			if($statusGroup < floor($statusGeneral / 100) * 100)
 			{
 				break;
 			}
