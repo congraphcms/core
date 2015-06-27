@@ -28,8 +28,16 @@ use Cookbook\Core\Exceptions\Exception as CookbookException;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-class ApiCommandDispatcher extends CommandDispatcher
+class ApiCommandDispatcher
 {
+
+	protected $dispatcher;
+
+
+	public function __construct(CommandDispatcher $dispatcher)
+	{
+		$this->dispatcher = $dispatcher;
+	}
 
 	/**
 	 * Dispatch a command to its appropriate handler.
@@ -45,7 +53,7 @@ class ApiCommandDispatcher extends CommandDispatcher
 		try
 		{
 			// dispatch the command
-			$result = parent::dispatch($command, $afterResolving);
+			$result = $this->dispatcher->dispatch($command, $afterResolving);
 		}
 		catch(Exception $e)
 		{
