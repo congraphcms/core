@@ -311,7 +311,7 @@ abstract class AbstractRepository implements RepositoryContract
 	 */
 	abstract protected function _create($model);
 
-	abstract protected function _update($model);
+	abstract protected function _update($id, $model);
 
 	abstract protected function _delete($id);
 }
