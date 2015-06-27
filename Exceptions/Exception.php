@@ -79,9 +79,9 @@ class Exception extends PHPException implements ErrorManagementContract
 				}
 			}
 		}
-
+		var_dump($compiledErrors);
 		$compiledErrors = $this->sortErrors($compiledErrors);
-		
+		var_dump($compiledErrors);
 		return $compiledErrors;
 	}
 
