@@ -46,9 +46,11 @@ class ApiCommandDispatcher extends CommandDispatcher
 		{
 			// dispatch the command
 			$result = parent::dispatch($command, $afterResolving);
+			dd($result);
 		}
 		catch(Exception $e)
 		{
+			dd($e);
 			return $this->handleException($e);
 		}
 
