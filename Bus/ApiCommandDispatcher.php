@@ -81,6 +81,8 @@ class ApiCommandDispatcher
 	{
 		$errors = $e->toArray();
 
+		dd($errors);
+
 		$responseCode = $this->getResponseCodeFromErrors($errors);
 
 		return $this->createResponse(['errors' => $errors], $responseCode);
