@@ -23,5 +23,12 @@ namespace Cookbook\Core\Exceptions;
  */
 class ValidationException extends BadRequestException
 {
-	
+	public function __construct($messages = [], $code = 422, $previous = [])
+	{
+		$this->setErrors($messages);
+
+		$this->code = $code;
+
+		$this->previous = $previous;
+	}
 }

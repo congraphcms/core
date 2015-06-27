@@ -23,5 +23,12 @@ namespace Cookbook\Core\Exceptions;
  */
 class BadRequestException extends Exception
 {
-	
+	public function __construct($messages = [], $code = 400, $previous = [])
+	{
+		$this->setErrors($messages);
+
+		$this->code = $code;
+
+		$this->previous = $previous;
+	}
 }

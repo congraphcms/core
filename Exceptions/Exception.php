@@ -79,6 +79,8 @@ class Exception extends PHPException implements ErrorManagementContract
 				}
 			}
 		}
+
+		$compiledErrors = $this->sortErrors($compiledErrors);
 		
 		return $compiledErrors;
 	}
@@ -112,5 +114,21 @@ class Exception extends PHPException implements ErrorManagementContract
 		$newKey = (empty($key))? '/' : $key;
 		return [$newKey => $errors];
 		
+	}
+
+	protected function sortErrors($errors)
+	{
+		usort($errors, function($a, $b){
+			if($a['code'] > $b['code'])
+			{
+				return 1;
+			}
+			if($a['code'] < $b['code'])
+			{
+				return -1;
+			}
+
+			return 0;
+		});
 	}
 }

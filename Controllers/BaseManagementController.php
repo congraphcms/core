@@ -11,7 +11,7 @@
 namespace Cookbook\Core\Controllers;
 
 use Illuminate\Routing\Controller;
-use Illuminate\Contracts\Bus\Dispatcher;
+use Cookbook\Core\Bus\ApiCommandDispatcher;
 use Illuminate\Contracts\Routing\ResponseFactory;
 
 /**
@@ -33,7 +33,7 @@ class BaseManagementController extends Controller
 
 	public $response;
 	
-	public function __construct(Dispatcher $bus, ResponseFactory $response)
+	public function __construct(ApiCommandDispatcher $bus, ResponseFactory $response)
 	{
 		$this->bus = $bus;
 		$this->response = $response;
