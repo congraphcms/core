@@ -28,7 +28,7 @@ class BusServiceProvider extends ServiceProvider
 
         $this->app->singleton('Cookbook\Core\Bus\ApiCommandDispatcher', function ($app) {
             return new ApiCommandDispatcher($app, function () use ($app) {
-                return $app['Illuminate\Contracts\Queue\Queue'];
+                return $app['Cookbook\Core\Bus\CommandDispatcher'];
             });
         });
 
