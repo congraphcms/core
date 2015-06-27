@@ -12,6 +12,7 @@ namespace Cookbook\Core\Bus;
 
 use Closure;
 use Exception;
+use Illuminate\Http\Response;
 use Cookbook\Core\Exceptions\Exception as CookbookException;
 
 /**
