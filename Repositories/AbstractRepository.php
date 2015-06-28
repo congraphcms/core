@@ -34,6 +34,12 @@ use Cookbook\Contracts\Core\RepositoryContract;
  */
 abstract class AbstractRepository implements RepositoryContract
 {
+	/**
+	 * Object type
+	 *
+	 * @var string
+	 */
+	protected $type;
 
 	/**
 	 * The database connection to use.
@@ -63,6 +69,13 @@ abstract class AbstractRepository implements RepositoryContract
 	 * @var array | null
 	 */
 	protected $transactionMethods = null;
+
+	/**
+	 * Number of minutes to keep cache
+	 *
+	 * @var int
+	 */
+	protected $cacheDuration;
 
 	/**
 	 * Repository constructor
@@ -197,7 +210,7 @@ abstract class AbstractRepository implements RepositoryContract
 
 		// logic after executin the method
 		// 
-		$this->afterProxy($method, $args);
+		$this->afterProxy($method, $args, $result);
 
 		// return the result of domain method
 		return $result;
@@ -235,7 +248,7 @@ abstract class AbstractRepository implements RepositoryContract
 	 * 
 	 * @return void
 	 */
-	protected function afterProxy($method, $args)
+	protected function afterProxy($method, $args, $result)
 	{
 		// if method is defined as transaction method
 		if
@@ -266,6 +279,12 @@ abstract class AbstractRepository implements RepositoryContract
 		// proxy call
 		$result = $this->proxy('_create', $args);
 
+		if($this->shouldUseCache())
+		{
+			Cache::put($this->type . ':' . $result->id, $result, $this->cacheDuration);
+			Cache::forget($this->type);
+		}
+
 		return $result;
 	}
 
@@ -283,6 +302,12 @@ abstract class AbstractRepository implements RepositoryContract
 
 		// proxy call
 		$result = $this->proxy('_update', $args);
+
+		if($this->shouldUseCache())
+		{
+			Cache::put($this->type . ':' . $result->id, $result, $this->cacheDuration);
+			Cache::forget($this->type);
+		}
 
 		return $result;
 	}
@@ -302,7 +327,79 @@ abstract class AbstractRepository implements RepositoryContract
 		// proxy call
 		$result = $this->proxy('_delete', $args);
 
+		if($this->shouldUseCache())
+		{
+			Cache::forget($this->type . ':' . $result);
+			Cache::forget($this->type);
+		}
+
 		return $result;
+	}
+
+	public function fetchById($id, $include = [], $refresh = false)
+	{
+		// arguments for private method 
+		$args = func_get_args();
+		$key = $this->type . ':' . $id . ':' . base64_encode($include);
+
+		if( $refresh || ! $this->shouldUseCache() )
+		{
+			// proxy call
+			$result = $this->proxy('_fetchById', $args);
+
+			if($this->shouldUseCache())
+			{
+				Cache::put($key, $result, $this->cacheDuration);
+			}
+
+			return $result;
+		}
+
+		return Cache::remember($key, $this->cacheDuration, function() use ($args){
+			return $this->proxy('_fetchById', $args);
+		});
+	}
+
+	public function get($filter = [], $offset = 0, $limit = 0, $sort = [], $include = [], $refresh = false)
+	{
+		// arguments for private method 
+		$args = func_get_args();
+		
+		$cacheArgs = [
+			'filter' => $filter,
+			'offset' => $offset, 
+			'limit' => $limit, 
+			'sort' => $sort, 
+			'include' => $include
+		];
+
+		$key = $this->type . ':' . base64_encode($cacheArgs);
+
+		if( $refresh || ! $this->shouldUseCache() )
+		{
+			// proxy call
+			$result = $this->proxy('_get', $args);
+
+			if($this->shouldUseCache())
+			{
+				Cache::put($key, $result, $this->cacheDuration);
+			}
+
+			return $result;
+		}
+
+		return Cache::remember($key, $this->cacheDuration, function() use ($args){
+			return $this->proxy('_get', $args);
+		});
+	}
+
+	protected function shouldUseCache()
+	{
+		if ($this instanceof UsesCache) {
+            return true;
+        }
+
+        return false;
 	}
 
 
@@ -314,4 +411,9 @@ abstract class AbstractRepository implements RepositoryContract
 	abstract protected function _update($id, $model);
 
 	abstract protected function _delete($id);
+
+	abstract protected function _fetchById($id, $include = []);
+
+	abstract protected function _get($filter = [], $offset = 0, $limit = 0, $sort = [], $include = []);
+
 }
