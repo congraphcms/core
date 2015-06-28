@@ -12,6 +12,7 @@ namespace Cookbook\Core\Repositories;
 
 use Illuminate\Database\Connection;
 use Cookbook\Contracts\Core\RepositoryContract;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Abstract repository
