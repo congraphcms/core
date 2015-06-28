@@ -281,7 +281,7 @@ abstract class AbstractRepository implements RepositoryContract
 
 		if($this->shouldUseCache())
 		{
-			Cache::put($this->type . ':' . $result->id, $result, $this->cacheDuration);
+			// Cache::put($this->type . ':' . $result->id, $result, $this->cacheDuration);
 			Cache::forget($this->type);
 		}
 
@@ -305,7 +305,7 @@ abstract class AbstractRepository implements RepositoryContract
 
 		if($this->shouldUseCache())
 		{
-			Cache::put($this->type . ':' . $result->id, $result, $this->cacheDuration);
+			// Cache::put($this->type . ':' . $result->id, $result, $this->cacheDuration);
 			Cache::forget($this->type);
 		}
 
@@ -329,7 +329,7 @@ abstract class AbstractRepository implements RepositoryContract
 
 		if($this->shouldUseCache())
 		{
-			Cache::forget($this->type . ':' . $result);
+			// Cache::forget($this->type . ':' . $result);
 			Cache::forget($this->type);
 		}
 
@@ -340,7 +340,7 @@ abstract class AbstractRepository implements RepositoryContract
 	{
 		// arguments for private method 
 		$args = func_get_args();
-		$key = $this->type . ':' . $id . ':' . base64_encode($include);
+		$key = $this->type . ':' . $id . ':' . base64_encode( json_encode($include) );
 
 		if( $refresh || ! $this->shouldUseCache() )
 		{
@@ -373,7 +373,7 @@ abstract class AbstractRepository implements RepositoryContract
 			'include' => $include
 		];
 
-		$key = $this->type . ':' . base64_encode($cacheArgs);
+		$key = $this->type . ':' . base64_encode( json_encode($cacheArgs) );
 
 		if( $refresh || ! $this->shouldUseCache() )
 		{
