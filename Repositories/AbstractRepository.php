@@ -403,6 +403,98 @@ abstract class AbstractRepository implements RepositoryContract
         return false;
 	}
 
+	protected function parseFilters($query, $filters)
+	{
+
+		foreach ($filters as $key => $filter)
+		{
+			if( ! is_array($filter) )
+			{
+				$query = $query->where($key, '=', $filter);
+				continue;
+			}
+
+			$query = $this->parseFilter($query, $key, $filter);
+		}
+		return $query;
+	}
+
+	protected function parseFilter($query, $key, $filter)
+	{
+		foreach ($filter as $operator => $value) {
+			switch ($operator) 
+			{
+				case 'ne':
+					$query = $query->where($key, '!=', $value);
+					break;
+				case 'lt':
+					$query = $query->where($key, '<', $value);
+					break;
+				case 'lte':
+					$query = $query->where($key, '<=', $value);
+					break;
+				case 'gt':
+					$query = $query->where($key, '>', $value);
+					break;
+				case 'gte':
+					$query = $query->where($key, '>=', $value);
+					break;
+				case 'in':
+					$query = $query->whereIn($key, $value);
+					break;
+				case 'nin':
+					$query = $query->whereNotIn($key, $value);
+					break;
+				
+				default:
+					throw new BadRequestException(['Filter operator not supported.']);
+					break;
+			}
+		}
+
+		return $query;
+	}
+
+
+
+	protected function parsePaging($query, $offset, $limit)
+	{
+		$offset = intval($offset);
+		$limit = intval($limit);
+
+		if( ! empty($offset) )
+		{
+			$query->skip($offset);
+		}
+
+		if( ! empty($limit) )
+		{
+			$query->take($limit);
+		}
+
+		return $query;
+	}
+
+	protected function parseSorting($query, $sort)
+	{
+		if( ! empty($sort) )
+		{
+			foreach ($sort as $sortCriteria) {
+				$sortDirection = 'asc';
+
+				if($sortCriteria[0] === '-')
+				{
+					$sortCriteria = substr($sortCriteria, 1);
+					$sortDirection = 'desc';
+				}
+
+				$query = $query->orderBy($sortCriteria, $sortDirection);
+			}
+		}
+
+		return $query;
+	}
+
 
 	/**
 	 * Abstract definition of RepositoryInterface methods
