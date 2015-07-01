@@ -296,7 +296,7 @@ abstract class AbstractRepository implements RepositoryContract
 	 * 
 	 * @return mixed
 	 */
-	public function update($model)
+	public function update($id, $model)
 	{
 		// arguments for private method 
 		$args = func_get_args();
@@ -337,7 +337,7 @@ abstract class AbstractRepository implements RepositoryContract
 		return $result;
 	}
 
-	public function fetchById($id, $include = [], $refresh = false)
+	public function fetchById($id, $refresh = false)
 	{
 		// arguments for private method 
 		$args = func_get_args();
@@ -361,7 +361,7 @@ abstract class AbstractRepository implements RepositoryContract
 		});
 	}
 
-	public function get($filter = [], $offset = 0, $limit = 0, $sort = [], $include = [], $refresh = false)
+	public function get($filter = [], $offset = 0, $limit = 0, $sort = [], $refresh = false)
 	{
 		// arguments for private method 
 		$args = func_get_args();
@@ -505,8 +505,8 @@ abstract class AbstractRepository implements RepositoryContract
 
 	abstract protected function _delete($id);
 
-	abstract protected function _fetchById($id, $include = []);
+	abstract protected function _fetchById($id);
 
-	abstract protected function _get($filter = [], $offset = 0, $limit = 0, $sort = [], $include = []);
+	abstract protected function _get($filter = [], $offset = 0, $limit = 0, $sort = []);
 
 }
