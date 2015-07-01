@@ -341,7 +341,7 @@ abstract class AbstractRepository implements RepositoryContract
 	{
 		// arguments for private method 
 		$args = func_get_args();
-		$key = $this->type . ':' . $id . ':' . base64_encode( json_encode($include) );
+		$key = $this->type . ':' . $id;
 
 		if( $refresh || ! $this->shouldUseCache() )
 		{
@@ -370,8 +370,7 @@ abstract class AbstractRepository implements RepositoryContract
 			'filter' => $filter,
 			'offset' => $offset, 
 			'limit' => $limit, 
-			'sort' => $sort, 
-			'include' => $include
+			'sort' => $sort
 		];
 
 		$key = $this->type . ':' . base64_encode( json_encode($cacheArgs) );
