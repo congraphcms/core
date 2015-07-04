@@ -75,6 +75,7 @@ class EventDispatcher extends Dispatcher
 
         foreach ($this->getListeners($event) as $listener)
         {
+            dd($listener);
         	
         	try
         	{
