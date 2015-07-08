@@ -40,7 +40,7 @@ if (!function_exists('cbMergeCollections')) {
 			}
 
 			foreach ($col as $obj) {
-				if( ! cbInCollection($merged, $obj->id, $objt->type) )
+				if( ! cbInCollection($merged, $obj->id, $obj->type) )
 				{
 					$merged[] = $obj;
 				}
