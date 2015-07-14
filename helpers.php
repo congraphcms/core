@@ -8,7 +8,8 @@
  * file that was distributed with this source code.
  */
 
-if (!function_exists('is_assoc')) {
+if (!function_exists('is_assoc'))
+{
 	/**
 	 * Check if array is associative array
 	 *
@@ -33,13 +34,15 @@ if (!function_exists('cbMergeCollections')) {
 		$args = func_get_args();
 
 		$merged = [];
-		foreach ($args as $col) {
+		foreach ($args as $col)
+		{
 			if( ! is_array($col) )
 			{
 				throw new InvalidArgumentsException('cbMergeCollections expects all parameters to be arrays.');
 			}
 
-			foreach ($col as $obj) {
+			foreach ($col as $obj)
+			{
 				if( ! cbInCollection($merged, $obj->id, $obj->type) )
 				{
 					$merged[] = $obj;
@@ -51,7 +54,8 @@ if (!function_exists('cbMergeCollections')) {
 	}
 }
 
-if (!function_exists('cbInCollection')) {
+if (!function_exists('cbInCollection'))
+{
 	/**
 	 * Check if object is in collection
 	 *
@@ -78,5 +82,92 @@ if (!function_exists('cbInCollection')) {
 		}
 
 		return false;
+	}
+}
+
+if (!function_exists('cbParseUrlParams'))
+{
+	/**
+	 * Handle URL params
+	 * 
+	 * convert GET params from string to array
+	 *
+	 * @param  string  	$type
+	 * @return boolean
+	 */
+	function cbParseUrlParams($params)
+	{
+		// cbParseUrlFilters
+		if( ! empty($params['filter']) )
+		{
+			if( ! is_array($params['filter']) )
+			{
+				throw new BadRequestException("Filter param needs to be array.");
+				
+			} 
+
+			foreach($params['filter'] as $key => &$filter)
+			{
+				if( ! is_array($filter) )
+				{
+					$filter = ['e' => $filter];
+					continue;
+				}
+			}
+		} 
+
+		// cbParseUrlFields
+		if( ! empty($params['fields']) && ! is_array($params['fields']) )
+		{
+			$fields = explode(',', $params['fields']);
+
+			array_walk($fields, function(&$item, $key){
+				$item = trim($item);
+			});
+
+			$params['fields'] = $fields;
+		}
+
+		// cbParseUrlInclude
+		if( ! empty($params['include']) && ! is_array($params['include']) )
+		{
+			$includes = explode(',', $params['include']);
+
+			array_walk($includes, function(&$item, $key){
+				$item = trim($item);
+			});
+
+			$include = [];
+
+			foreach ($includes as $item) {
+				$item = explode('.', $item);
+
+				if( ! array_key_exists($item[0], $include) )
+				{
+					$include[$item[0]] = [];
+				}
+
+				if(count($item) > 1)
+				{
+					$itemIncludes = $item;
+					array_shift($itemIncludes);
+					$itemIncludes = implode('.', $itemIncludes);
+
+					if( ! array_key_exists('include', $include[$item[0]]) )
+					{
+						$include[$item[0]]['include'] = $itemIncludes;
+					}
+					else
+					{
+						$include[$item[0]]['include'] .= ',' . $itemIncludes;
+					}
+					
+				}
+			}
+
+			$params['include'] = $include;
+		}
+
+		return $params;
 	}
 }

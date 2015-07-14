@@ -42,7 +42,7 @@ class EventDispatcher extends Dispatcher
      * @param  bool  $halt
      * @return array|null
      */
-    public function fire($event, $payload = [], $halt = false)
+    public function fire($event, &$payload = [], $halt = false)
     {
         // When the given "event" is actually an object we will assume it is an event
         // object and use the class as the event name and this event itself as the
@@ -151,7 +151,7 @@ class EventDispatcher extends Dispatcher
     }
 
     /**
-     * Get the parent class listeners for the event.
+     * Get the parent class or interface listeners for the event.
      *
      * @param  object  $event
      * @return array
