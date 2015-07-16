@@ -83,6 +83,7 @@ trait MapperTrait
 
 		if( isset(self::$mappings[$key]) && isset(self::$mappings[$key][$resourceName]) )
 		{
+			dd(self::$mappings[$key]);
 			$mappings = array_merge_recursive( $mappings, self::$mappings[$key][$resourceName] );
 		}
 
