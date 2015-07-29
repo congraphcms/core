@@ -337,7 +337,7 @@ abstract class AbstractRepository implements RepositoryContract
 		return $result;
 	}
 
-	public function fetchById($id, $refresh = false)
+	public function fetch($id, $refresh = false)
 	{
 		// arguments for private method 
 		$args = func_get_args();
@@ -346,7 +346,7 @@ abstract class AbstractRepository implements RepositoryContract
 		if( $refresh || ! $this->shouldUseCache() )
 		{
 			// proxy call
-			$result = $this->proxy('_fetchById', $args);
+			$result = $this->proxy('_fetch', $args);
 
 			if($this->shouldUseCache())
 			{
@@ -357,7 +357,7 @@ abstract class AbstractRepository implements RepositoryContract
 		}
 
 		return Cache::remember($key, $this->cacheDuration, function() use ($args){
-			return $this->proxy('_fetchById', $args);
+			return $this->proxy('_fetch', $args);
 		});
 	}
 
@@ -504,7 +504,7 @@ abstract class AbstractRepository implements RepositoryContract
 
 	abstract protected function _delete($id);
 
-	abstract protected function _fetchById($id);
+	abstract protected function _fetch($id);
 
 	abstract protected function _get($filter = [], $offset = 0, $limit = 0, $sort = []);
 
