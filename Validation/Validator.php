@@ -168,7 +168,7 @@ abstract class Validator
 	{
 
 		// get validator instance
-		return Validator::make($params, $rules);
+		return LaravelValidator::make($params, $rules);
 	}
 
 
