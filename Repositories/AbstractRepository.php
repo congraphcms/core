@@ -478,6 +478,9 @@ abstract class AbstractRepository implements RepositoryContract
 	{
 		if( ! empty($sort) )
 		{
+			
+			$sort = (is_array($sort))? $sort: [$sort];
+
 			foreach ($sort as $sortCriteria) {
 				$sortDirection = 'asc';
 
