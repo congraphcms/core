@@ -423,6 +423,9 @@ abstract class AbstractRepository implements RepositoryContract
 		foreach ($filter as $operator => $value) {
 			switch ($operator) 
 			{
+				case 'e':
+					$query = $query->where($key, '=', $value);
+					break;
 				case 'ne':
 					$query = $query->where($key, '!=', $value);
 					break;
