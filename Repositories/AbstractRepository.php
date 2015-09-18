@@ -413,12 +413,12 @@ abstract class AbstractRepository implements RepositoryContract
 				continue;
 			}
 
-			$query = $this->parseFilter($query, $key, $filter);
+			$query = $this->parseFilterOperator($query, $key, $filter);
 		}
 		return $query;
 	}
 
-	protected function parseFilter($query, $key, $filter)
+	protected function parseFilterOperator($query, $key, $filter)
 	{
 		foreach ($filter as $operator => $value) {
 			switch ($operator) 
