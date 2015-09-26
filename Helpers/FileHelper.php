@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EAV\Helpers;
+namespace Cookbook\Core\Helpers;
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
@@ -28,20 +28,20 @@ use Illuminate\Support\Facades\Storage;
 class FileHelper
 {
 
-	/**
-	 * Get uploads url from config and optionally concatonates
-	 * given url to uploads url
-	 *
-	 * @param string $url - optional url
-	 * @return string
-	 */
-	public static function uploadsUrl($url = ''){
-		$url = Config::get('cookbook::cookbook.uploads_url') . '/' . $url;
-		$rtrim = !empty($url);
-		$url = url(self::normalizeUrl($url, $rtrim));
+	// /**
+	//  * Get uploads url from config and optionally concatonates
+	//  * given url to uploads url
+	//  *
+	//  * @param string $url - optional url
+	//  * @return string
+	//  */
+	// public static function uploadsUrl($url = ''){
+	// 	$url = Config::get('cookbook::cookbook.uploads_url') . '/' . $url;
+	// 	$rtrim = !empty($url);
+	// 	$url = url(self::normalizeUrl($url, $rtrim));
 
-		return $url;
-	}
+	// 	return $url;
+	// }
 
 	// /**
 	//  * Gets uploads path from config and optionally concatonates
@@ -166,7 +166,6 @@ class FileHelper
 	public static function uniqueFilename($path) {
 		// get directory
 		$dir = self::getDirectory($path);
-
 		// get filename
 		$filename = self::getFileName($path);
 
@@ -203,7 +202,7 @@ class FileHelper
 			else
 				$filename = str_replace( "$number$ext", ++$number . $ext, $filename );
 		}
-		return $filename;
+		return self::normalizePath($dir . DIRECTORY_SEPARATOR . $filename);
 	}
 
 

@@ -11,7 +11,7 @@
 namespace Cookbook\Core\Bus;
 
 /**
- * Base Repository Command class
+ * Base Command class
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
@@ -19,34 +19,7 @@ namespace Cookbook\Core\Bus;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-abstract class RepositoryCommand extends Command
+abstract class Command
 {
 
-	/**
-	 * Object ID
-	 * 
-	 * @var int
-	 */
-	public $id;
-
-	/**
-	 * Command params
-	 * 
-	 * @var array
-	 */
-	public $params;
-
-	/**
-	 * Create new RepositoryCommand
-	 *
-	 * @param array 					$params
-	 * @param mixed 					$id
-	 * 
-	 * @return void
-	 */
-	public function __construct(array $params, $id = null)
-	{		
-		$this->params = $params;
-		$this->id = $id;
-	}
 }

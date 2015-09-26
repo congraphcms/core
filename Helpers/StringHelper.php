@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\EAV\Helpers;
+namespace Cookbook\Core\Helpers;
 
 use Cookbook\Contracts\Core\StringHelperContract;
 
@@ -35,10 +35,10 @@ class StringHelper implements StringHelperContract
 	 * 
 	 * @return string
 	 */
-	public function createSlug($string)
+	public static function createSlug($string)
 	{
 		// remove all accent characters
-		$string = $this->remove_accents($string);
+		$string = self::remove_accents($string);
 
 		// lowercase
 		$string = strtolower($string);
@@ -67,7 +67,7 @@ class StringHelper implements StringHelperContract
 	 * 
 	 * @return string Filtered string with replaced "nice" characters.
 	 */
-	public function remove_accents( $string ) {
+	public static function remove_accents( $string ) {
 		if ( !preg_match('/[\x80-\xff]/', $string) )
 			return $string;
 		if (seems_utf8($string)) {

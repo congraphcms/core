@@ -10,6 +10,10 @@
 
 namespace Cookbook\Core\Traits;
 
+use Exception;
+use Cookbook\Core\Bus\Command;
+use Illuminate\Support\Facades\Bus;
+
 /**
  * MapperTrait for mapping events/handlers/commands
  * 
@@ -23,6 +27,12 @@ namespace Cookbook\Core\Traits;
  */
 trait MapperTrait
 {
+	/**
+	 * List of default resolver methods keyed by mapper groups
+	 * 
+	 * @var array
+	 */
+	protected static $defaultResolveMethods = [];
 
 	/**
 	 * All of the mappings.
@@ -44,7 +54,7 @@ trait MapperTrait
 	 * @param  array  $mappings
 	 * @return void
 	 */
-	public static function map(array $mappings, $key = 'default')
+	public static function maps(array $mappings, $key = 'default')
 	{
 		self::$mappings = array_merge_recursive(self::$mappings, [ $key => $mappings ]);
 	}
@@ -55,7 +65,7 @@ trait MapperTrait
 	 * @param  \Closure  $mapper
 	 * @return void
 	 */
-	public static function mapper(Closure $mapper, $key = 'default')
+	public static function mapUsing(Closure $mapper, $key = 'default')
 	{
 		self::$mappers[$key] = $mapper;
 	}
@@ -90,15 +100,82 @@ trait MapperTrait
 	}
 
 	/**
-	 * Get mapping segment.
-	 *
-	 * @param  string  	$mapping
-	 * @param  int  	$segment
-	 * @return string
+	 * Resolve mapping end return result
+	 * 
+	 * @param mixed $resource - mapping name to be resolved
+	 * @param array $parameters - params for resolver
+	 * @param string $key - mapping section
+	 * 
+	 * @throws  Exception
+	 * 
+	 * @return  mixed
 	 */
-	protected static function getSegment($mapping, $segment)
+	public function resolveMapping($resource, $parameters = [], $key = 'default')
 	{
-		return explode('@', $mapping)[$segment];
+		$resourceName = $resource;
+
+		if( is_object($resource) )
+		{
+			$resourceName = get_class($resource);
+		}
+
+		$mappings = $this->getMappings($resourceName, $key);
+
+		if(empty($mappings))
+		{
+			throw new Exception('No resolvers mapped for resource: ' . $resourceName . '.');
+		}
+
+		$result = null;
+
+		if(is_array($mappings))
+		{
+			foreach ($mappings as $mapping)
+			{
+				$result[] = $this->runResolver($mapping, $parameters);
+			}
+
+			return $result;
+		}
+
+		return $this->runResolver($mappings, $parameters);
+	}
+
+	/**
+	 * Handle and run the resolver
+	 * 
+	 * @param mixed $resolver
+	 * @param array $parameters - params for resolver
+	 * 
+	 * @return  mixed
+	 */
+	public function runResolver($resolver, $parameters = [])
+	{
+		if (is_callable($resolver))
+		{
+            return call_user_func_array($resolver, $parameters);
+        }
+
+        if(class_exists($resolver))
+        {
+        	$instance = $this->container->make($resolver, $parameters);
+		    if($instance instanceof Command)
+		    {
+		    	return Bus::dispatch($instance, $parameters);
+		    }
+        }
+
+        if(strpos($resolver, '@') !== false)
+        {
+        	list($class, $method) = explode('@', $this->action['uses']);
+
+        	if (!method_exists($instance = $this->container->make($class), $method)) {
+		        throw new Exception('Invalid method mapped on object: ' . $class . '.');
+		    }
+
+        	return call_user_func_array([$instance, $method], $parameters);
+        }
+        throw new Exception('Invalid resolver: ' . $resolver . '.');
 	}
 
 }
