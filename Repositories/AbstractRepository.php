@@ -228,13 +228,7 @@ abstract class AbstractRepository implements RepositoryContract
 	protected function beforeProxy($method, $args)
 	{
 		// if method is defined as transaction method
-		if
-		(	empty($this->transactionMethods) || 
-			(	
-				is_array($this->transactionMethods) && 
-				in_array($method, $this->transactionMethods)
-			)
-		)
+		if( is_array($this->transactionMethods) && in_array($method, $this->transactionMethods) )
 		{
 			// begin transaction
 			$this->db->beginTransaction();
@@ -252,13 +246,7 @@ abstract class AbstractRepository implements RepositoryContract
 	protected function afterProxy($method, $args, $result)
 	{
 		// if method is defined as transaction method
-		if
-		(	empty($this->transactionMethods) || 
-			(	
-				is_array($this->transactionMethods) && 
-				in_array($method, $this->transactionMethods)
-			)
-		)
+		if( is_array($this->transactionMethods) && in_array($method, $this->transactionMethods) )
 		{
 			// commit transaction
 			$this->db->commit();
