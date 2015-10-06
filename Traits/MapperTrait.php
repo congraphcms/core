@@ -110,7 +110,7 @@ trait MapperTrait
 	 * 
 	 * @return  mixed
 	 */
-	public function resolveMapping($resource, $parameters = [], $key = 'default')
+	public function resolveMapping($resource, $parameters = [], $key = 'default', $method = null)
 	{
 		$resourceName = $resource;
 
@@ -132,13 +132,13 @@ trait MapperTrait
 		{
 			foreach ($mappings as $mapping)
 			{
-				$result[] = $this->runResolver($mapping, $parameters);
+				$result[] = $this->runResolver($mapping, $parameters, $method);
 			}
 
 			return $result;
 		}
 
-		return $this->runResolver($mappings, $parameters);
+		return $this->runResolver($mappings, $parameters, $method);
 	}
 
 	/**
@@ -149,7 +149,7 @@ trait MapperTrait
 	 * 
 	 * @return  mixed
 	 */
-	public function runResolver($resolver, $parameters = [])
+	public function runResolver($resolver, $parameters = [], $method = null)
 	{
 		if (is_callable($resolver))
 		{
@@ -163,6 +163,11 @@ trait MapperTrait
 		    {
 		    	return Bus::dispatch($instance, $parameters);
 		    }
+
+		    if(is_callable($instance, $method))
+		    {
+		    	 return call_user_func_array([$instance, $method], $parameters);
+		    }
         }
 
         if(strpos($resolver, '@') !== false)
@@ -175,6 +180,7 @@ trait MapperTrait
 
         	return call_user_func_array([$instance, $method], $parameters);
         }
+
         throw new Exception('Invalid resolver: ' . $resolver . '.');
 	}
 

@@ -23,7 +23,8 @@ use Illuminate\Support\ServiceProvider;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-class CoreServiceProvider extends ServiceProvider {
+class CoreServiceProvider extends ServiceProvider
+{
 
 	/**
 	* Register
@@ -60,7 +61,9 @@ class CoreServiceProvider extends ServiceProvider {
 		// -----------------------------------------------------------------------------
 		$this->app->register('Cookbook\Core\Events\EventsServiceProvider');
 
-		
+		// Repositories
+		// -----------------------------------------------------------------------------
+		$this->app->register('Cookbook\Core\Repositories\RepositoriesServiceProvider');
 	}
 
 }
