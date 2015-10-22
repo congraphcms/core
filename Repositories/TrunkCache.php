@@ -60,10 +60,12 @@ class TrunkCache implements TrunkContract
 		if($data instanceof Model)
 		{
 			$this->putItem($data);
+			return;
 		}
 		if($data instanceof Collection)
 		{
 			$this->putCollection($data);
+			return;
 		}
 
 		throw new Exception('You are trying to put invalid object to trunk.');

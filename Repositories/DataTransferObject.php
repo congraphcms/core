@@ -115,7 +115,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * @param string|array 	$key
 	 * @param mixed 		$value
 	 */
-	public function setMeta($key, $value)
+	public function setMeta($key, $value = null)
 	{
 		if(is_array($key))
 		{
@@ -150,7 +150,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * @param string|array 	$key
 	 * @param mixed 		$value
 	 */
-	public function setParams($key, $value)
+	public function setParams($key, $value = null)
 	{
 		if(is_array($key))
 		{
@@ -575,21 +575,16 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 				$data = get_object_vars($data);
 			}
 		}
-	
-		if (is_array($data))
+		
+		if ( is_array($data) && ! empty($data) )
 		{
-			/*
-			* Return array converted to object
-			* Using __FUNCTION__ (Magic constant)
-			* for recursive call
-			*/
-			return array_map([$this, __FUNCTION__], $data, array_fill(0, count($data), $nestedInclude));
+			foreach ($data as $key => &$value)
+			{
+				$value = $this->transformToArray($value, $nestedInclude);
+			}
+			
 		}
-		else
-		{
-			// Return array
-			return $data;
-		}
+		return $data;
 	}
 
 	/**

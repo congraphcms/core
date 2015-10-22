@@ -13,6 +13,7 @@ namespace Cookbook\Core\Repositories;
 use stdClass;
 use Exception;
 use Iterator;
+use Countable;
 
 /**
  * Collection class used for data transfer
@@ -23,7 +24,7 @@ use Iterator;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-class Collection extends DataTransferObject implements Iterator
+class Collection extends DataTransferObject implements Iterator, Countable
 {
 	/**
 	 * Collection type
@@ -182,5 +183,12 @@ class Collection extends DataTransferObject implements Iterator
 	function valid()
 	{
 		return isset($this->data[$this->position]);
+	}
+
+	// Countable functions
+	
+	function count()
+	{
+		return count($this->data);
 	}
 }
