@@ -11,11 +11,8 @@
 namespace Cookbook\Core\Repositories;
 
 use stdClass;
-use ArrayAccess;
 use Exception;
 use Cookbook\Contracts\Core\TrunkContract;
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\Support\Jsonable;
 
 /**
  * In call data transfer cache
@@ -43,13 +40,6 @@ class Trunk implements TrunkContract
 	private $collectionStorage;
 
 	/**
-	 * List of objects that should be included in result
-	 * 
-	 * @var array
-	 */
-	private $included = [];
-
-	/**
 	 * Creates Trunk
 	 */
 	public function __construct()
@@ -62,41 +52,31 @@ class Trunk implements TrunkContract
 	 * Add item or collection to trunk
 	 * 
 	 * @param  mixed  $data
-	 * @param  boolean $include
 	 * 
 	 * @return void
 	 */
-	public function put($data, $include = false)
+	public function put($data)
 	{
-		if($data instanceof stdClass)
-		{
-			$data = new Model($this, $data);
-		}
-
-		if(is_array($data))
-		{
-			$data = new Collection($this, $data);
-		}
-
 		if($data instanceof Model)
 		{
-			$this->putItem($data, $include);
+			$this->putItem($data);
 		}
 		if($data instanceof Collection)
 		{
-			$this->putCollection($data, $include);
+			$this->putCollection($data);
 		}
+
+		throw new Exception('You are trying to put invalid object to trunk.');
 	}
 
 	/**
 	 * Add item to trunk
 	 * 
 	 * @param  Model  $item
-	 * @param  boolean $include
 	 * 
 	 * @return void
 	 */
-	public function putItem($item, $include = false)
+	public function putItem($item)
 	{
 		if(empty($item->getId()) || empty($item->getType()))
 		{
@@ -109,29 +89,16 @@ class Trunk implements TrunkContract
 		}
 
 		$this->itemStorage[$item->getType()][$item->getId()] = $item;
-
-		if($include)
-		{
-			if( ! array_key_exists($item->getType(), $this->included) )
-			{
-				$this->included[$item->getType()] = [];
-			}
-			if( ! in_array($item->getId(), $this->included[$item->getType()]))
-			{
-				$this->included[$item->getType()][] = $item->getId();
-			}
-		}
 	}
 
 	/**
 	 * Add collection to trunk
 	 * 
 	 * @param  Collection  $collection
-	 * @param  boolean $include
 	 * 
 	 * @return void
 	 */
-	public function putCollection($collection, $include = false)
+	public function putCollection($collection)
 	{
 		if( ! array_key_exists($collection->getType(), $this->collectionStorage) )
 		{
@@ -142,7 +109,7 @@ class Trunk implements TrunkContract
 
 		foreach ($collection as $item)
 		{
-			$this->putItem($item, $include);
+			$this->putItem($item);
 		}
 	}
 
@@ -264,7 +231,7 @@ class Trunk implements TrunkContract
 	 * 
 	 * @return void
 	 */
-	public function clear($id, $type)
+	public function forget($id, $type)
 	{
 		if( array_key_exists($type, $this->itemStorage) && array_key_exists($id, $this->itemStorage[$type]) )
 		{
@@ -273,11 +240,6 @@ class Trunk implements TrunkContract
 		if( array_key_exists($type, $this->collectionStorage) )
 		{
 			unset($this->collectionStorage[$type]);
-		}
-		if( array_key_exists($type, $this->included) && in_array($id, $this->included[$type]) )
-		{
-			$key = array_search($id, $this->included[$type]);
-			unset($this->itemStorage[$type][$key]);
 		}
 	}
 
@@ -288,7 +250,7 @@ class Trunk implements TrunkContract
 	 * 
 	 * @return void
 	 */
-	public function clearType($type)
+	public function forgetType($type)
 	{
 		if( array_key_exists($type, $this->itemStorage) )
 		{
@@ -298,38 +260,6 @@ class Trunk implements TrunkContract
 		{
 			unset($this->collectionStorage[$type]);
 		}
-		if( array_key_exists($type, $this->included) )
-		{
-			unset($this->included[$type]);
-		}
-	}
-
-	/**
-	 * Clear included objects
-	 * 
-	 * @return void
-	 */
-	public function clearInclude()
-	{
-		$this->included = [];
-	}
-
-	/**
-	 * Check if object should be included in result
-	 * 
-	 * @param  mixed $id
-	 * @param  mixed $type
-	 * 
-	 * @return boolean
-	 */
-	public function includes($id, $type)
-	{
-		if( array_key_exists($type, $this->included) && in_array($id, $this->included[$type]) )
-		{
-			return true;
-		}
-
-		return false;
 	}
 
 	/**

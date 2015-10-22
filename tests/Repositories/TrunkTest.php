@@ -13,7 +13,7 @@ class TrunkTest extends PHPUnit_Framework_TestCase
 		$post->title = 'Post Title';
 		$post->body = 'Post body...';
 
-		$trunk->put($post, true);
+		$post = new Cookbook\Core\Repositories\Model($trunk, $post);
 
 		$post2 = new stdClass();
 		$post2->id = 2;
@@ -26,13 +26,13 @@ class TrunkTest extends PHPUnit_Framework_TestCase
 
 		$collection = [$post2];
 
-		$trunk->put($collection, true);
+		$collection = new Cookbook\Core\Repositories\Collection($trunk, $collection);
 
-		$result = $trunk->get(2, 'post');
+		$collection->load('parent');
 
-		var_dump($trunk->includes(1, 'post'));
+		$result = $trunk->get([], 'post');
 
-		var_dump($result->toArray(true, true));
+		var_dump($result->toArray(true, false));
 	}
 }
 ?>

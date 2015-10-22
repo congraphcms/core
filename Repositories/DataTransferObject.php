@@ -13,7 +13,8 @@ namespace Cookbook\Core\Repositories;
 use stdClass;
 use ArrayAccess;
 use Exception;
-use Cookbook\Contracts\Core\TrunkContract;
+use Coobook\Core\Facades\Resovler;
+use Coobook\Core\Facades\Trunk;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 
@@ -28,13 +29,6 @@ use Illuminate\Contracts\Support\Jsonable;
  */
 abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 {
-	/**
-	 * Provider of resolved objects
-	 * mapped by id and type
-	 * 
-	 * @var Cookbook\Contracts\Core\TrunkContract
-	 */
-	protected $trunk;
 
 	/**
 	 * Main transfer data
@@ -64,16 +58,37 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 */
 	protected $isCollection;
 
+	/**
+	 * List of relations to be included in result
+	 * 
+	 * @var array
+	 */
+	protected $relations = [];
+
+	/**
+	 * List of included objects
+	 * 
+	 * @var array
+	 */
+	protected $included = [];
+
+	/**
+	 * Load queue
+	 * 
+	 * @var array
+	 */
+	protected static $loadQueue = [];
+
 
 	/**
 	 * Creates new DataTransferObject
 	 * 
 	 * @param stdClass|array $data
 	 */
-	public function __construct(TrunkContract $trunk, $data = null)
+	public function __construct($data)
 	{
-		$this->trunk = $trunk;
 		$this->setData($data);
+		Trunk::put($this);
 	}
 
 	/**
@@ -82,6 +97,17 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * @param mixed $data object or collection of objects
 	 */
 	abstract public function setData($data);
+
+
+	/**
+	 * Get transfer data
+	 * 
+	 * @return  mixed
+	 */
+	public function getData()
+	{
+		return $this->data;
+	}
 
 	/**
 	 * Set meta data
@@ -154,29 +180,225 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		return $this->params[$key];
 	}
 
-	// /**
-	//  * Map object to trunk
-	//  * 
-	//  */
-	// protected function mapToTrunk($object)
-	// {
-	// 	$query = ['id' => $object->id, 'type' => $object->type];
-	// 	$queryKey = base64_encode(json_encode($query));
+	/**
+	 * Preload relationships
+	 * 
+	 * @param  array $relations
+	 * @return void
+	 */
+	public function load($relations = [])
+	{
+		$this->addRelations($relations);
+		
+		$this->clearQueue();
 
-	// 	if( ! array_key_exists($queryKey, $this->trunk) )
-	// 	{
-	// 		$this->trunk[$queryKey] = $object;
-	// 	}
+		$this->queueUnresolvedObjects($this->data, $this->relations);
 
-	// 	foreach ($this->include as $queryKey => $object)
-	// 	{
-	// 		if( ! array_key_exists($queryKey, $this->trunk) )
-	// 		{
-	// 			$this->trunk[$queryKey] = $object;
-	// 		}
-	// 	}
-	// }
+		$this->loadQueue();
+	}
 
+	/**
+	 * Load objects from queue
+	 * 
+	 * @return void
+	 */
+	protected function loadQueue()
+	{
+		foreach (self::$loadQueue as $type => $queries)
+		{
+			foreach ($queries as $query)
+			{
+				$ids = [];
+				foreach ($query['ids'] as $id)
+				{
+					if( Trunk::has($id, $type) )
+					{
+						$object = Trunk::get($id, $type);
+						$this->addIncludes($object);
+						continue;
+					}
+
+					$ids[] = $id;
+				}
+
+				if( empty($ids) )
+				{
+					continue;
+				}
+
+				$result = Resolver::resolve($query['type'], $query['ids'], $query['relations']);
+				Trunk::put($result);
+				
+				$this->addIncludes($result);
+			}
+		}
+	}
+
+	/**
+	 * Add items to include
+	 * 
+	 * @param mixed $includes
+	 *
+	 * @return void
+	 */
+	public function addIncludes($includes)
+	{
+		if($includes instanceof Model)
+		{
+			$this->addItemToInclude($includes);
+			return;
+		}
+		foreach ($includes as $item)
+		{
+			$this->addItemToInclude($item);
+		}
+	}
+
+	public function addItemToInclude($item)
+	{
+		$this->included[$this->objectKey($item)] = $item;
+	}
+
+	public function getIncludes($keyed = false)
+	{
+		$includes = $this->included;
+		foreach ($this->included as $key => $object)
+		{
+			$objIncludes = $object->getIncludes(true);
+			$includes = $includes + $objIncludes;
+		}
+
+		if( ! $keyed )
+		{
+			$includes = array_values($includes);
+		}
+
+		return $includes;
+	}
+
+	/**
+	 * Add relation properties
+	 * 
+	 * @param array | string $relations
+	 * 
+	 * @return void
+	 */
+	public function addRelations($relations)
+	{
+		$relations = ( is_array($relations) ) ? $relations : explode(',', strval($relations));
+		foreach ($relations as $prop)
+		{
+			if( ! in_array($prop, $this->relations) )
+			{
+				$this->relations[] = $prop;
+			}
+		}
+	}
+
+	protected function addToQueue($object, $relations)
+	{
+		if( ! array_key_exists($object->type, self::$loadQueue) )
+		{
+			self::$loadQueue[$object->type] = [];
+		}
+		$relationsKey = base64_encode(json_encode($relations));
+		if( ! array_key_exists($relationsKey, self::$loadQueue) )
+		{
+			self::$loadQueue[$object->type][$relationsKey] = [ 'type' => $object->type, 'ids' => [], 'relations' => $relations ];
+		}
+		self::$loadQueue[$object->type][$relationsKey]['ids'][] = $object->id;
+	}
+
+	protected function clearQueue()
+	{
+		self::$loadQueue = [];
+	}
+
+	public function queueUnresolvedObjects($data, $relations)
+	{
+		
+		if( is_object($data) )
+		{
+			if( $data instanceof Model )
+			{
+				$data = $data->getData();
+			}
+
+			if( ! $this->resolved($data) )
+			{
+				$this->addToQueue($data, $relations);
+				return;
+			}
+
+			$data = get_object_vars($data);
+		}
+
+		if( is_array($data) )
+		{
+			foreach ($data as $key => $value)
+			{
+				if($this->hasRelation($key, $relations))
+				{
+					$nestedRelations = $this->getNestedRelations($key, $relations);
+					$this->queueUnresolvedObjects($value, $nestedRelations);
+				}
+				if(is_int($key))
+				{
+					$this->queueUnresolvedObjects($value, $relations);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Check if relation exists
+	 * 
+	 * @param  string	$key
+	 * @param  array	$relations
+	 * 
+	 * @return boolean
+	 */
+	protected function hasRelation($key, $relations)
+	{
+		foreach ($relations as $prop)
+		{
+			if($prop === $key || 0 === strpos($prop, $key.'.'))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get nested relations for field
+	 * 
+	 * @param  string	$prop
+	 * @param  array	$relations
+	 * 
+	 * @return boolean
+	 */
+	protected function getNestedRelations($key, $relations)
+	{
+		$nestedRelations = [];
+
+		foreach ($relations as $prop)
+		{
+			if(0 === strpos($prop, $key.'.'))
+			{
+				$newRelation = substr($prop, strlen($key));
+				if( strlen($newRelation) !== 0)
+				{
+					$nestedRelations[] = $newRelation;
+				}
+			}
+		}
+
+		$nestedRelations = array_unique($nestedRelations);
+
+		return $nestedRelations;
+	}
 
 	// ArrayAccess functions
 	
@@ -274,26 +496,26 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	public function toArray($includeMetaData = false, $nestedInclude = true)
 	{
 		$data = $this->transformToArray($this->data, $nestedInclude);
-		$result = [];
 		
-		if( ! empty($this->include) && ! $nestedInclude)
+		if( ! $includeMetaData )
 		{
-			$result['include'] = $this->transformToArray(array_values($this->include));
+			return $data;
+		}
+
+		$result = [];
+		$result['data'] = $data;
+		
+		if( ! empty($this->included) && ! $nestedInclude && $includeMetaData)
+		{
+			$result['included'] = $this->transformToArray($this->getIncludes(), false);
 		}
 
 		if( $includeMetaData && ! empty($this->meta) )
 		{
-			$result['meta'] = $this->transformToArray($this->meta);
+			$result['meta'] = $this->meta;
 		}
 
-		if( $includeMetaData || ! $nestedInclude )
-		{
-			$result['data'] = $data;
-		}
-		else
-		{
-			$result = $data;
-		}
+		
 
 		return $result;
 	}
@@ -337,14 +559,15 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	protected function transformToArray($data, $nestedInclude = true)
 	{
 		if (is_object($data))
-		{	
+		{
 			if( $nestedInclude && ! $this->resolved($data) )
 			{
-				$data = $this->resolve($data);
+				$data = $this->getIncluded($data);
 			}
 
-			if($data instanceof Arrayable)
+			if($data instanceof DataTransferObject)
 			{
+				$data->addIncludes($this->included);
 				$data = $data->toArray(false, $nestedInclude);
 			}
 			else
@@ -360,7 +583,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 			* Using __FUNCTION__ (Magic constant)
 			* for recursive call
 			*/
-			return array_map([$this, __FUNCTION__], $data);
+			return array_map([$this, __FUNCTION__], $data, array_fill(0, count($data), $nestedInclude));
 		}
 		else
 		{
@@ -401,29 +624,48 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 */
 	protected function resolve($obj)
 	{
-		if($this->trunk->has($obj->id, $obj->type))
+		if(Trunk::has($obj->id, $obj->type))
 		{
-			return $data = $this->trunk->get($obj->id, $obj->type);
+			return $data = Trunk::get($obj->id, $obj->type);
 		}
 
 		return $obj;
 	}
 
 	/**
-	 * Get included object from trunk if it's included,
-	 * otherwise return unresolved object
+	 * Get resolved object from included
 	 * 
-	 * @param  object	$obj
+	 * @param  object $obj
 	 * 
 	 * @return object
 	 */
-	protected function resolveIncluded($obj)
+	public function getIncluded($obj)
 	{
-		if($this->trunk->includes($obj->id, $obj->type))
+		$includes = $this->getIncludes(true);
+		$objectKey = $this->objectKey($obj);
+		
+		if(array_key_exists($objectKey, $includes))
 		{
-			return $data = $this->trunk->get($obj->id, $obj->type);
+			return $includes[$objectKey];
 		}
 
 		return $obj;
+	}
+
+	public function clearIncluded()
+	{
+		$this->included = [];
+	}
+
+	/**
+	 * Make base64 key from object
+	 * 
+	 * @param  object $object
+	 * 
+	 * @return string
+	 */
+	protected function objectKey($object)
+	{
+		return base64_encode(json_encode(['id' => $object->id, 'type' => $object->type]));
 	}
 }

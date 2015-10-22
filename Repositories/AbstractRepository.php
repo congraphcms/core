@@ -12,7 +12,6 @@ namespace Cookbook\Core\Repositories;
 
 use Illuminate\Database\Connection;
 use Cookbook\Contracts\Core\RepositoryContract;
-use Cookbook\Contracts\Core\TrunkContract;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -51,13 +50,6 @@ abstract class AbstractRepository implements RepositoryContract
 	protected $db;
 
 	/**
-	 * In call cache trunk
-	 *
-	 * @var Cookbook\Contracts\Core\TrunkContract
-	 */
-	protected $trunk;
-
-	/**
 	 * Array of private|protected repository methods that should be called 
 	 * through proxy() method - domain methods.
 	 * @var array
@@ -91,10 +83,9 @@ abstract class AbstractRepository implements RepositoryContract
 	 * 
 	 * @param \Illuminate\Database\Connection $db
 	 */
-	public function __construct(Connection $db, TrunkContract $trunk)
+	public function __construct(Connection $db)
 	{
 		$this->setConnection($db);
-		$this->setTrunk($trunk);
 	}
 
 	/**
@@ -128,19 +119,6 @@ abstract class AbstractRepository implements RepositoryContract
 	public function setConnection(Connection $db)
 	{
 		$this->db = $db;
-		return $this;
-	}
-
-	/**
-	 * Set the connection to run queries on.
-	 *
-	 * @param \Illuminate\Database\Connection $db
-	 *
-	 * @return $this
-	 */
-	public function setTrunk(TrunkContract $trunk)
-	{
-		$this->trunk = $trunk;
 		return $this;
 	}
 
@@ -347,13 +325,13 @@ abstract class AbstractRepository implements RepositoryContract
 		return $result;
 	}
 
-	public function fetch($id, $refresh = false)
+	public function fetch($id, $include = [])
 	{
 		// arguments for private method 
 		$args = func_get_args();
 		$key = $this->type . ':' . $id;
 
-		if( $refresh || ! $this->shouldUseCache() )
+		if( ! $this->shouldUseCache() )
 		{
 			// proxy call
 			$result = $this->proxy('_fetch', $args);
@@ -371,7 +349,7 @@ abstract class AbstractRepository implements RepositoryContract
 		});
 	}
 
-	public function get($filter = [], $offset = 0, $limit = 0, $sort = [], $refresh = false)
+	public function get($filter = [], $offset = 0, $limit = 0, $sort = [], $include = [])
 	{
 		// arguments for private method 
 		$args = func_get_args();
@@ -385,7 +363,7 @@ abstract class AbstractRepository implements RepositoryContract
 
 		$key = $this->type . ':' . base64_encode( json_encode($cacheArgs) );
 
-		if( $refresh || ! $this->shouldUseCache() )
+		if( ! $this->shouldUseCache() )
 		{
 			// proxy call
 			$result = $this->proxy('_get', $args);
@@ -508,159 +486,6 @@ abstract class AbstractRepository implements RepositoryContract
 		}
 
 		return $query;
-	}
-
-	public function sortInclude($include)
-	{
-		// take include / comma(,) separated values turn to array
-		$include = ( is_array($include) ) ? $include : explode(',', $include);
-
-
-		$sortedInclude = [];
-		// sort include params
-		foreach ($include as $param)
-		{
-			$param = trim($param);
-			
-			$nodes = explode('.', $param);
-
-			if( empty($nodes[0]) )
-			{
-				continue;
-			}
-
-			if( ! array_key_exists($nodes[0], $sortedInclude) )
-			{
-				$sortedInclude[$nodes[0]] = [];
-			}
-
-			$newInclude = '';
-			if(count($nodes) > 1)
-			{
-				for ($i=1; $i < count($nodes); $i++)
-				{ 
-					$newInclude .= (empty($newInclude))? $nodes[$i] : '.' . $nodes[$i];
-				}
-			}
-
-			if( ! empty($newInclude) )
-			{
-				$sortedInclude[$nodes[0]][] = $newInclude;
-			}
-		}
-
-		return $sortedInclude;
-	}
-
-	public function getUnresolvedObjects($data, $include)
-	{
-		$sortedInclude = $this->sortInclude($include);
-
-		$unresolvedObjects = [];
-
-		if( ! is_array($data) )
-		{
-			$data = [$data];
-		}
-
-		foreach ($data as $object)
-		{
-			if( ! is_object($object) )
-			{
-				continue;
-			}
-
-			$arr = get_object_vars($object);
-
-			foreach ($arr as $field => $value)
-			{
-				if(array_key_exists($field, $sortedInclude))
-				{
-					if( is_array($value) )
-					{
-						foreach ($value as $singleValue) 
-						{
-							$this->checkFieldForUnresolvedObjects($field, $singleValue, $sortedInclude, $unresolvedObjects);
-						}
-
-						continue;
-					}
-
-					$this->checkFieldForUnresolvedObjects($field, $value, $sortedInclude, $unresolvedObjects);
-
-					continue;
-				}
-			}
-		}
-
-		return $unresolvedObjects;
-	}
-
-	protected function checkFieldForUnresolvedObjects($field, $value, $sortedInclude, &$unresolvedObjects)
-	{
-		if($this->isUnresolved($value))
-		{
-			$query = [
-				'type' => $value->type,
-				'include' => $sortedInclude[$field]
-			];
-
-			$queryKey = base64_encode(json_encode($query));
-
-			if( ! array_key_exists($queryKey, $unresolvedObjects) )
-			{
-				$unresolvedObjects[$queryKey] = $query;
-				$unresolvedObjects[$queryKey]['ids'] = [];
-			}
-
-			if( ! in_array($value->id, $unresolvedObjects[$queryKey]['ids']))
-			{
-				$unresolvedObjects[$queryKey]['ids'][] = $value->id;
-			}
-
-			return;
-		}
-
-		if( is_object($value) )
-		{
-			$uo = $this->getUnresolvedObjects($value, $sortedInclude[$field]);
-
-			foreach ($uo as $queryKey => $query)
-			{
-				if( ! array_key_exists($queryKey, $unresolvedObjects) )
-				{
-					$unresolvedObjects[$queryKey] = $query;
-					$unresolvedObjects[$queryKey]['ids'] = [];
-				}
-			}
-
-			$unresolvedObjects[$queryKey]['ids'] = array_merge($unresolvedObjects[$queryKey]['ids'], $uo[$queryKey]['ids']);
-			$unresolvedObjects[$queryKey]['ids'] = array_unique($unresolvedObjects[$queryKey]['ids']);
-
-			return;
-		}
-	}
-
-	protected function isUnresolved($object)
-	{
-		if( ! is_object($object) )
-		{
-			return false;
-		}
-
-		$arr = get_object_vars($object);
-
-		if( count($arr) == 2 && array_key_exists('id', $arr) && array_key_exists('type', $arr) )
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	public function populateResult($result, $resolves)
-	{
-		return $result;
 	}
 
 

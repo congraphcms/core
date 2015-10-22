@@ -12,9 +12,6 @@ namespace Cookbook\Core\Repositories;
 
 use stdClass;
 use Exception;
-use Cookbook\Contracts\Core\TrunkContract;
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\Support\Jsonable;
 
 /**
  * Model class used for data transfer
@@ -60,9 +57,9 @@ class Model extends DataTransferObject
 	 * 
 	 * @param stdClass|array $data
 	 */
-	public function __construct(TrunkContract $trunk, $data = null)
+	public function __construct($data = null)
 	{
-		parent::__construct($trunk, $data);
+		parent::__construct($data);
 		$this->isCollection = false;
 	}
 
@@ -134,7 +131,6 @@ class Model extends DataTransferObject
 			$unresolvedValue->id = $value->id;
 			$unresolvedValue->type = $value->type;
 			$this->data->{$name} = $unresolvedValue;
-			$this->trunk->put($value, true);
 			return;
 		}
 
@@ -150,7 +146,6 @@ class Model extends DataTransferObject
 			}
 
 			$this->data->{$name} = $unresolvedCollection;
-			$this->trunk->put($value, true);
 			
 			return;
 		}

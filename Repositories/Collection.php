@@ -13,9 +13,6 @@ namespace Cookbook\Core\Repositories;
 use stdClass;
 use Exception;
 use Iterator;
-use Cookbook\Contracts\Core\TrunkContract;
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Contracts\Support\Jsonable;
 
 /**
  * Collection class used for data transfer
@@ -40,9 +37,9 @@ class Collection extends DataTransferObject implements Iterator
 	 * 
 	 * @param stdClass|array $data
 	 */
-	public function __construct(TrunkContract $trunk, $data = null)
+	public function __construct($data = null)
 	{
-		parent::__construct($trunk, $data);
+		parent::__construct($data);
 		$this->isCollection = true;
 	}
 
@@ -106,7 +103,7 @@ class Collection extends DataTransferObject implements Iterator
 	{
 		if( ! $item instanceof Model )
 		{
-			$item = new Model($this->trunk, $item);
+			$item = new Model($item);
 		}
 
 		$this->data[] = $item;
@@ -150,7 +147,7 @@ class Collection extends DataTransferObject implements Iterator
 		{
 			if( ! $item instanceof Model )
 			{
-				$item = new Model($this->trunk, $item);
+				$item = new Model($item);
 			}
 		}
 

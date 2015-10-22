@@ -48,11 +48,11 @@ class ObjectResolver implements ObjectResolverContract
 	}
 
 
-	public function resolve($type, $ids)
+	public function resolve($type, $ids, $include = [])
 	{
 		$multiple = false;
 		$method = 'fetch';
-		$params = [$ids];
+		$params = [$ids, $include];
 
 		if(is_array($ids))
 		{
@@ -63,16 +63,16 @@ class ObjectResolver implements ObjectResolverContract
 					'id' => [
 						'in' => $ids
 					]
-				]
+				], 0, 0, [], $include
 			];
 		}
 
 		return $this->resolveMapping($type, $params, 'default', $method);
 	}
 
-	public function resolveWithParams($type, $filter = [], $offset = 0, $limit = 0, $sort = [])
+	public function resolveWithParams($type, $filter = [], $offset = 0, $limit = 0, $sort = [], $include = [])
 	{
-		return $this->resolveMapping($type, [$filter, $offset, $limit, $sort], 'default', 'get');
+		return $this->resolveMapping($type, [$filter, $offset, $limit, $sort, $include], 'default', 'get');
 	}
 
 
