@@ -13,8 +13,8 @@ namespace Cookbook\Core\Repositories;
 use stdClass;
 use ArrayAccess;
 use Exception;
-use Coobook\Core\Facades\Resovler;
-use Coobook\Core\Facades\Trunk;
+use Cookbook\Core\Facades\Resovler;
+use Cookbook\Core\Facades\Trunk;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 

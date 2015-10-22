@@ -23,7 +23,7 @@ use Cookbook\Contracts\Core\TrunkContract;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-class Trunk implements TrunkContract
+class TrunkCache implements TrunkContract
 {
 	/**
 	 * Item Storage

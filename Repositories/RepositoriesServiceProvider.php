@@ -22,12 +22,12 @@ class RepositoriesServiceProvider extends ServiceProvider
 			'Cookbook\Core\Repositories\ObjectResolver', 'Cookbook\Contracts\Core\ObjectResolverContract'
 		);
 
-		$this->app->singleton('Cookbook\Core\Repositories\Trunk', function ($app) {
-			return new Trunk();
+		$this->app->singleton('Cookbook\Core\Repositories\TrunkCache', function ($app) {
+			return new TrunkCache();
 		});
 
 		$this->app->alias(
-			'Cookbook\Core\Repositories\Trunk', 'Cookbook\Contracts\Core\TrunkContract'
+			'Cookbook\Core\Repositories\TrunkCache', 'Cookbook\Contracts\Core\TrunkContract'
 		);
 	}
 
@@ -41,7 +41,7 @@ class RepositoriesServiceProvider extends ServiceProvider
 		return [
 			'Cookbook\Core\Repositories\ObjectResolver',
 			'Cookbook\Contracts\Core\ObjectResolverContract',
-			'Cookbook\Core\Repositories\Trunk',
+			'Cookbook\Core\Repositories\TrunkCache',
 			'Cookbook\Contracts\Core\TrunkContract',
 		];
 	}

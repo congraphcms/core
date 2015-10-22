@@ -11,6 +11,7 @@
 namespace Cookbook\Core\Traits;
 
 use Exception;
+use Closure;
 use Cookbook\Core\Bus\Command;
 use Illuminate\Support\Facades\Bus;
 

@@ -10,6 +10,7 @@
 
 namespace Cookbook\Core\Traits;
 
+use Illuminate\Contracts\Support\MessageProvider;
 use Illuminate\Support\MessageBag;
 
 /**
