@@ -30,22 +30,14 @@ class TrunkCache implements TrunkContract
 	 * 
 	 * @var array
 	 */
-	private $itemStorage;
-
-	/**
-	 * Collection Storage
-	 * 
-	 * @var array
-	 */
-	private $collectionStorage;
+	private $storage;
 
 	/**
 	 * Creates Trunk
 	 */
 	public function __construct()
 	{
-		$this->itemStorage = [];
-		$this->collectionStorage = [];
+		$this->storage = [];
 	}
 
 	/**
@@ -57,62 +49,18 @@ class TrunkCache implements TrunkContract
 	 */
 	public function put($data)
 	{
-		if($data instanceof Model)
-		{
-			$this->putItem($data);
-			return;
-		}
-		if($data instanceof Collection)
-		{
-			$this->putCollection($data);
-			return;
-		}
-
-		throw new Exception('You are trying to put invalid object to trunk.');
-	}
-
-	/**
-	 * Add item to trunk
-	 * 
-	 * @param  Model  $item
-	 * 
-	 * @return void
-	 */
-	public function putItem($item)
-	{
-		if(empty($item->getId()) || empty($item->getType()))
+		if( ! $data instanceof DataTransferObject)
 		{
 			throw new Exception('You are trying to put invalid object to trunk.');
 		}
 
-		if( ! array_key_exists($item->getType(), $this->itemStorage) )
+		if( ! array_key_exists($data->getType(), $this->storage) )
 		{
-			$this->itemStorage[$item->getType()] = [];
+			$this->storage[$data->getType()] = [];
 		}
 
-		$this->itemStorage[$item->getType()][$item->getId()] = $item;
-	}
-
-	/**
-	 * Add collection to trunk
-	 * 
-	 * @param  Collection  $collection
-	 * 
-	 * @return void
-	 */
-	public function putCollection($collection)
-	{
-		if( ! array_key_exists($collection->getType(), $this->collectionStorage) )
-		{
-			$this->collectionStorage[$collection->getType()] = [];
-		}
-		$collectionKey = $this->collectionKey($collection->getParams());
-		$this->collectionStorage[$collection->getType()][$collectionKey] = $collection;
-
-		foreach ($collection as $item)
-		{
-			$this->putItem($item);
-		}
+		$storageKey = $this->storageKey($data->getParams());
+		$this->storage[$data->getType()][$storageKey] = $data;
 	}
 
 	/**
@@ -127,42 +75,33 @@ class TrunkCache implements TrunkContract
 	{
 		if(is_array($key))
 		{
-			return $this->hasCollection($key, $type);
+			return $this->hasItem($this->storageKey($key), $type);
 		}
 
-		return $this->hasItem($key, $type);
-	}
-
-	/**
-	 * Check if item exists in cache
-	 * 
-	 * @param  mixed  $id
-	 * @param  mixed  $type
-	 * 
-	 * @return boolean
-	 */
-	public function hasItem($id, $type)
-	{
-		if(array_key_exists($type, $this->itemStorage) && array_key_exists($id, $this->itemStorage[$type]))
+		if(is_string($key))
 		{
-			return true;
+			return $this->hasItem($key, $type);
+		}
+
+		if(is_int($key))
+		{
+			return $this->hasItem($this->storageKey([$key]), $type);
 		}
 
 		return false;
 	}
 
 	/**
-	 * Check if collection exists in cache
+	 * Check if item exists in cache
 	 * 
-	 * @param  array  $params
-	 * @param  mixed  $type
+	 * @param  string  $key
+	 * @param  string  $type
 	 * 
 	 * @return boolean
 	 */
-	public function hasCollection($params, $type)
+	protected function hasItem($key, $type)
 	{
-		$collectionKey = $this->collectionKey($params);
-		if(array_key_exists($type, $this->collectionStorage) && array_key_exists($collectionKey, $this->collectionStorage[$type]))
+		if(array_key_exists($type, $this->storage) && array_key_exists($key, $this->storage[$type]))
 		{
 			return true;
 		}
@@ -174,52 +113,43 @@ class TrunkCache implements TrunkContract
 	 * Get item or collection from cache
 	 * 
 	 * @param  mixed $key
-	 * @param  mixed $type
+	 * @param  string $type
 	 * 
-	 * @return Model | null
+	 * @return DataTransferObject | null
 	 */
 	public function get($key, $type)
 	{
 		if(is_array($key))
 		{
-			return $this->getCollection($key, $type);
+			return $this->getItem($this->storageKey($key), $type);
 		}
 
-		return $this->getItem($key, $type);
-	}
-
-	/**
-	 * Get item by id and type
-	 * 
-	 * @param  mixed $id
-	 * @param  mixed $type
-	 * 
-	 * @return Model | null
-	 */
-	public function getItem($id, $type)
-	{
-		if(array_key_exists($type, $this->itemStorage) && array_key_exists($id, $this->itemStorage[$type]))
+		if(is_string($key))
 		{
-			return $this->itemStorage[$type][$id];
+			return $this->getItem($key, $type);
+		}
+
+		if(is_int($key))
+		{
+			return $this->getItem($this->storageKey([$key]), $type);
 		}
 
 		return null;
 	}
 
 	/**
-	 * Get collection by params and type
+	 * Get item by id and type
 	 * 
-	 * @param  array $params
-	 * @param  mixed $type
+	 * @param  string $key
+	 * @param  string $type
 	 * 
-	 * @return Model | null
+	 * @return DataTransferObject | null
 	 */
-	public function getCollection(array $params, $type)
+	protected function getItem($key, $type)
 	{
-		$collectionKey = $this->collectionKey($params);
-		if(array_key_exists($type, $this->collectionStorage) && array_key_exists($collectionKey, $this->collectionStorage[$type]))
+		if(array_key_exists($type, $this->storage) && array_key_exists($key, $this->storage[$type]))
 		{
-			return $this->collectionStorage[$type][$collectionKey];
+			return $this->storage[$type][$key];
 		}
 
 		return null;
@@ -233,15 +163,37 @@ class TrunkCache implements TrunkContract
 	 * 
 	 * @return void
 	 */
-	public function forget($id, $type)
+	public function forget($key, $type)
 	{
-		if( array_key_exists($type, $this->itemStorage) && array_key_exists($id, $this->itemStorage[$type]) )
+		if(is_array($key))
 		{
-			unset($this->itemStorage[$type][$id]);
+			return $this->forgetItem($this->storageKey($key), $type);
 		}
-		if( array_key_exists($type, $this->collectionStorage) )
+
+		if(is_string($key))
 		{
-			unset($this->collectionStorage[$type]);
+			return $this->forgetItem($key, $type);
+		}
+
+		if(is_int($key))
+		{
+			return $this->forgetItem($this->storageKey([$key]), $type);
+		}
+	}
+
+	/**
+	 * Clear item from cache
+	 * 
+	 * @param  string $id
+	 * @param  string $type
+	 * 
+	 * @return void
+	 */
+	protected function forgetItem($key, $type)
+	{
+		if( array_key_exists($type, $this->storage) && array_key_exists($key, $this->storage[$type]) )
+		{
+			unset($this->storage[$type][$key]);
 		}
 	}
 
@@ -254,24 +206,30 @@ class TrunkCache implements TrunkContract
 	 */
 	public function forgetType($type)
 	{
-		if( array_key_exists($type, $this->itemStorage) )
+		if( array_key_exists($type, $this->storage) )
 		{
-			unset($this->itemStorage[$type]);
-		}
-		if( array_key_exists($type, $this->collectionStorage) )
-		{
-			unset($this->collectionStorage[$type]);
+			unset($this->storage[$type]);
 		}
 	}
 
 	/**
-	 * Make base64 key from collection params
+	 * Clear all cache
+	 * 
+	 * @return void
+	 */
+	public function forgetAll()
+	{
+		$this->storage = [];
+	}
+
+	/**
+	 * Make base64 key from DataTransferObject params
 	 * 
 	 * @param  array $params
 	 * 
 	 * @return string
 	 */
-	protected function collectionKey(array $params)
+	protected function storageKey(array $params)
 	{
 		return base64_encode(json_encode($params));
 	}

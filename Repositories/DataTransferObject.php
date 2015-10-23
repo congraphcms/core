@@ -13,7 +13,7 @@ namespace Cookbook\Core\Repositories;
 use stdClass;
 use ArrayAccess;
 use Exception;
-use Cookbook\Core\Facades\Resovler;
+use Cookbook\Core\Facades\Resolver;
 use Cookbook\Core\Facades\Trunk;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
@@ -119,7 +119,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	{
 		if(is_array($key))
 		{
-			$this->meta = array_merge_recursive($this->meta, $key);
+			$this->meta = array_merge($this->meta, $key);
 			return $this;
 		}
 
@@ -227,6 +227,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 				}
 
 				$result = Resolver::resolve($query['type'], $query['ids'], $query['relations']);
+
 				Trunk::put($result);
 				
 				$this->addIncludes($result);
@@ -261,11 +262,16 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 
 	public function getIncludes($keyed = false)
 	{
-		$includes = $this->included;
+		$includes = [];
+
 		foreach ($this->included as $key => $object)
 		{
-			$objIncludes = $object->getIncludes(true);
-			$includes = $includes + $objIncludes;
+			if( ! array_key_exists($key, $includes) )
+			{
+				$includes[$key] = $object;
+				$objIncludes = $object->getIncludes(true);
+				$includes = $includes + $objIncludes;
+			}
 		}
 
 		if( ! $keyed )
@@ -302,11 +308,12 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 			self::$loadQueue[$object->type] = [];
 		}
 		$relationsKey = base64_encode(json_encode($relations));
-		if( ! array_key_exists($relationsKey, self::$loadQueue) )
+		if( ! array_key_exists($relationsKey, self::$loadQueue[$object->type]) )
 		{
 			self::$loadQueue[$object->type][$relationsKey] = [ 'type' => $object->type, 'ids' => [], 'relations' => $relations ];
 		}
 		self::$loadQueue[$object->type][$relationsKey]['ids'][] = $object->id;
+
 	}
 
 	protected function clearQueue()
@@ -348,6 +355,8 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 				}
 			}
 		}
+
+
 	}
 
 	/**
@@ -556,19 +565,29 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * 
 	 * @return array
 	 */
-	protected function transformToArray($data, $nestedInclude = true)
+	public function transformToArray($data, $nestedInclude = true, $extraIncludes = [])
 	{
 		if (is_object($data))
 		{
 			if( $nestedInclude && ! $this->resolved($data) )
 			{
-				$data = $this->getIncluded($data);
+				$objectKey = $this->objectKey($data);
+				
+				if(array_key_exists($objectKey, $extraIncludes))
+				{
+					$data = $extraIncludes[$objectKey];
+				}
+				else
+				{
+					$data = $this->getIncluded($data);
+				}
+				
 			}
 
 			if($data instanceof DataTransferObject)
 			{
-				$data->addIncludes($this->included);
-				$data = $data->toArray(false, $nestedInclude);
+				// $data->addIncludes($this->included);
+				$data = $data->transformToArray($data->getData(), $nestedInclude, $this->included);
 			}
 			else
 			{

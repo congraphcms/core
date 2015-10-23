@@ -131,12 +131,7 @@ trait MapperTrait
 
 		if(is_array($mappings))
 		{
-			foreach ($mappings as $mapping)
-			{
-				$result[] = $this->runResolver($mapping, $parameters, $method);
-			}
-
-			return $result;
+			return $this->runResolver($mappings[0], $parameters, $method);
 		}
 
 		return $this->runResolver($mappings, $parameters, $method);
@@ -165,7 +160,7 @@ trait MapperTrait
 		    	return Bus::dispatch($instance, $parameters);
 		    }
 
-		    if(is_callable($instance, $method))
+		    if(is_callable([$instance, $method]))
 		    {
 		    	 return call_user_func_array([$instance, $method], $parameters);
 		    }
