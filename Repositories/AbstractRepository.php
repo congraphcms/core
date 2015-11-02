@@ -32,6 +32,8 @@ use Illuminate\Support\Facades\Cache;
  * @package 	Cookbook/Core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
+ * 
+ * @todo  		Implement appropriate use of Cache
  */
 abstract class AbstractRepository implements RepositoryContract
 {
@@ -268,11 +270,11 @@ abstract class AbstractRepository implements RepositoryContract
 		// proxy call
 		$result = $this->proxy('_create', $args);
 
-		if($this->shouldUseCache())
-		{
-			// Cache::put($this->type . ':' . $result->id, $result, $this->cacheDuration);
-			Cache::forget($this->type);
-		}
+		// if($this->shouldUseCache())
+		// {
+		// 	// Cache::put($this->type . ':' . $result->id, $result, $this->cacheDuration);
+		// 	Cache::forget($this->type);
+		// }
 
 		return $result;
 	}
@@ -292,11 +294,11 @@ abstract class AbstractRepository implements RepositoryContract
 		// proxy call
 		$result = $this->proxy('_update', $args);
 
-		if($this->shouldUseCache())
-		{
-			// Cache::put($this->type . ':' . $result->id, $result, $this->cacheDuration);
-			Cache::forget($this->type);
-		}
+		// if($this->shouldUseCache())
+		// {
+		// 	// Cache::put($this->type . ':' . $result->id, $result, $this->cacheDuration);
+		// 	Cache::forget($this->type);
+		// }
 
 		return $result;
 	}
@@ -316,11 +318,11 @@ abstract class AbstractRepository implements RepositoryContract
 		// proxy call
 		$result = $this->proxy('_delete', $args);
 
-		if($this->shouldUseCache())
-		{
-			// Cache::forget($this->type . ':' . $result);
-			Cache::forget($this->type);
-		}
+		// if($this->shouldUseCache())
+		// {
+		// 	// Cache::forget($this->type . ':' . $result);
+		// 	Cache::forget($this->type);
+		// }
 
 		return $result;
 	}
@@ -329,66 +331,67 @@ abstract class AbstractRepository implements RepositoryContract
 	{
 		// arguments for private method 
 		$args = func_get_args();
-		$key = $this->type . ':' . $id;
+		
+		// proxy call
+		$result = $this->proxy('_fetch', $args);
 
-		if( ! $this->shouldUseCache() )
-		{
-			// proxy call
-			$result = $this->proxy('_fetch', $args);
+		return $result;
 
-			if($this->shouldUseCache())
-			{
-				Cache::put($key, $result, $this->cacheDuration);
-			}
+		// $key = $this->type . ':' . $id;
 
-			return $result;
-		}
+		// if( ! $this->shouldUseCache() )
+		// {
+		// 	// proxy call
+		// 	$result = $this->proxy('_fetch', $args);
 
-		return Cache::remember($key, $this->cacheDuration, function() use ($args){
-			return $this->proxy('_fetch', $args);
-		});
+		// 	return $result;
+		// }
+
+		// return Cache::remember($key, $this->cacheDuration, function() use ($args){
+		// 	return $this->proxy('_fetch', $args);
+		// });
 	}
 
 	public function get($filter = [], $offset = 0, $limit = 0, $sort = [], $include = [])
 	{
 		// arguments for private method 
 		$args = func_get_args();
+
+		// proxy call
+		$result = $this->proxy('_get', $args);
+
+		return $result;
 		
-		$cacheArgs = [
-			'filter' => $filter,
-			'offset' => $offset, 
-			'limit' => $limit, 
-			'sort' => $sort
-		];
+		// $cacheArgs = [
+		// 	'filter' => $filter,
+		// 	'offset' => $offset, 
+		// 	'limit' => $limit, 
+		// 	'sort' => $sort
+		// ];
 
-		$key = $this->type . ':' . base64_encode( json_encode($cacheArgs) );
+		// $key = $this->type . ':' . base64_encode( json_encode($cacheArgs) );
 
-		if( ! $this->shouldUseCache() )
-		{
-			// proxy call
-			$result = $this->proxy('_get', $args);
+		// if( ! $this->shouldUseCache() )
+		// {
+		// 	// proxy call
+		// 	$result = $this->proxy('_get', $args);
 
-			if($this->shouldUseCache())
-			{
-				Cache::put($key, $result, $this->cacheDuration);
-			}
+		// 	return $result;
+		// }
 
-			return $result;
-		}
-
-		return Cache::remember($key, $this->cacheDuration, function() use ($args){
-			return $this->proxy('_get', $args);
-		});
+		// return Cache::remember($key, $this->cacheDuration, function() use ($args){
+		// 	return $this->proxy('_get', $args);
+		// });
 	}
 
-	protected function shouldUseCache()
-	{
-		if ($this instanceof UsesCache) {
-            return true;
-        }
+	// protected function shouldUseCache()
+	// {
+	// 	if ($this instanceof UsesCache) {
+ //            return true;
+ //        }
 
-        return false;
-	}
+ //        return false;
+	// }
 
 	protected function parseFilters($query, $filters)
 	{

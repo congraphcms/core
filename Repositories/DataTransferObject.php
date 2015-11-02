@@ -17,6 +17,7 @@ use Cookbook\Core\Facades\Resolver;
 use Cookbook\Core\Facades\Trunk;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
+use Carbon\Carbon;
 
 /**
  * Abstract object class used for data transfer
@@ -323,9 +324,9 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 
 	public function queueUnresolvedObjects($data, $relations)
 	{
-		
 		if( is_object($data) )
 		{
+
 			if( $data instanceof Model )
 			{
 				$data = $data->getData();
@@ -338,6 +339,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 			}
 
 			$data = get_object_vars($data);
+
 		}
 
 		if( is_array($data) )
@@ -396,7 +398,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		{
 			if(0 === strpos($prop, $key.'.'))
 			{
-				$newRelation = substr($prop, strlen($key));
+				$newRelation = substr($prop, strlen($key) + 1);
 				if( strlen($newRelation) !== 0)
 				{
 					$nestedRelations[] = $newRelation;
@@ -588,6 +590,10 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 			{
 				// $data->addIncludes($this->included);
 				$data = $data->transformToArray($data->getData(), $nestedInclude, $this->included);
+			}
+			elseif($data instanceof Carbon)
+			{
+				$data = $data->tz('UTC')->toIso8601String();
 			}
 			else
 			{
