@@ -72,7 +72,7 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	public function dispatch($command, Closure $afterResolving = null)
 	{
 		// fire any registered events before command
-		$this->fireBeforeCommandEvents($command);
+		$this->fireBeforeCommandEvent($command);
 
 		// validate command with registered validator
 		$this->validate($command);
@@ -81,7 +81,7 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 		$result = parent::dispatch($command, $afterResolving);
 		
 		// fire any registered events after command
-		$this->fireAfterCommandEvents($command, $result);
+		$this->fireAfterCommandEvent($command, $result);
 
 		// return the handler result
 		return $result;
@@ -94,127 +94,65 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	 * 
 	 * @return void
 	 */
-	protected function fireBeforeCommandEvents($command)
+	protected function fireEvent($name, $beforeOrAfter, &$args)
 	{
-		// get events classes
-		$events = $this->getBeforeEvents($command);
+		$eventName = 'cb.' . $beforeOrAfter . '.' . $name;
 
-		// if no registered events return
-		if( $events === false )
-		{
-			return;
-		}
-
-		if( ! is_array($events) )
-		{
-			$events = [$events];
-		}
-
-
-		foreach ($events as $event) {
-			// fire the events
-			Event::fire( new $event($command) );
-		}
-		
+		$this->event->fire($eventName, $args);
 	}
 
 	/**
-	 * Fire registered after command events
+	 * Fire registered before command events
 	 *
 	 * @param  mixed  $command
 	 * 
 	 * @return void
 	 */
-	protected function fireAfterCommandEvents($command, &$result)
+	protected function fireBeforeCommandEvent($command)
 	{
-		// get event class
-		$events = $this->getAfterEvents($command);
+		$eventName = $this->commandNameToEventName($command);
 
-		// if no registered events return
-		if( $events === false )
-		{
-			return;
-		}
+		$args = [$command];
 
-		if( ! is_array($events) )
-		{
-			$events = [$events];
-		}
-
-
-		foreach ($events as $event) {
-			// fire the events
-			Event::fire( new $event($command, $result) );
-		}
+		$this->fireEvent($eventName, 'before', $args);
 	}
 
 	/**
-	 * Get the events classes for fireing before the given command.
+	 * Fire registered before command events
 	 *
 	 * @param  mixed  $command
-	 * @return string
+	 * 
+	 * @return void
 	 */
-	public function getBeforeEvents($command)
+	protected function fireAfterCommandEvent($command, $result)
 	{
-		return $this->getCommandEvents($command, 'before');
+		$eventName = $this->commandNameToEventName($command);
+
+		$args = [$command, $result];
+
+		$this->fireEvent($eventName, 'after', $args);
 	}
 
 	/**
-	 * Get the events classes for fireing after the given command.
+	 * Fire registered before command events
 	 *
 	 * @param  mixed  $command
-	 * @return string
-	 */
-	public function getAfterEvents($command)
-	{
-		return $this->getCommandEvents($command, 'after');
-	}
-
-	/**
-	 * Get the events classes for the given command.
-	 *
-	 * @param  mixed  	$command
-	 * @param  string  	$beforeOrAfter
-	 * @return string
-	 */
-	protected function getCommandEvents($command, $beforeOrAfter)
-	{
-		// get command class name
-		$commandName = get_class($command);
-
-		// if there is registered event
-		if ( isset($this->eventMappings[$commandName]) && isset($this->eventMappings[$commandName][$beforeOrAfter]) )
-		{
-			return $this->eventMappings[$commandName][$beforeOrAfter];
-		}
-		elseif ($this->eventMapper)
-		{
-			return call_user_func($this->eventMapper, $command);
-		}
-
-		return false;
-	}
-
-	/**
-	 * Register command-to-event mappings.
-	 *
-	 * @param  array  $events
+	 * 
 	 * @return void
 	 */
-	public function mapEvents(array $events)
+	protected function commandNameToEventName($command)
 	{
-		$this->eventMappings = array_merge_recursive($this->eventMappings, $events);
-	}
+		$commandName = class_basename($command);
+		if(ends_with($commandName, 'Command'))
+		{
+			$commandName = substr($commandName, 0, strpos($commandName, 'Command'));
+		}
 
-	/**
-	 * Register a fallback eventMapper callback.
-	 *
-	 * @param  \Closure  $mapper
-	 * @return void
-	 */
-	public function mapEventsUsing(Closure $mapper)
-	{
-		$this->eventMapper = $mapper;
+		$commandName = snake_case($commandName);
+		$parts = explode('_', $commandName);
+		$eventName = implode('.', $parts);
+
+		return $eventName;
 	}
 
 	/**
