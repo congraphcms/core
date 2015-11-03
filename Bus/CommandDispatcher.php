@@ -46,20 +46,6 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	 */
 	protected $validatorMapper;
 
-	/**
-	 * All of the command-to-event mappings.
-	 *
-	 * @var array
-	 */
-	protected $eventMappings = [];
-
-	/**
-	 * The fallback event mapping Closure.
-	 *
-	 * @var \Closure
-	 */
-	protected $eventMapper;
-
 
 	/**
 	 * Dispatch a command to its appropriate handler.
@@ -98,7 +84,7 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	{
 		$eventName = 'cb.' . $beforeOrAfter . '.' . $name;
 
-		$this->event->fire($eventName, $args);
+		Event::fire($eventName, $args);
 	}
 
 	/**

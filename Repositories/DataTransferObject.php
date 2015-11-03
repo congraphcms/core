@@ -205,16 +205,17 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 */
 	protected function loadQueue()
 	{
-		foreach (self::$loadQueue as $type => $queries)
+		$loadQueue = self::$loadQueue;
+		foreach ($loadQueue as $type => $queries)
 		{
 			foreach ($queries as $query)
 			{
 				$ids = [];
 				foreach ($query['ids'] as $id)
 				{
-					if( Trunk::has($id, $type) )
+					if( Trunk::has([$id, $query['relations']], $type) )
 					{
-						$object = Trunk::get($id, $type);
+						$object = Trunk::get([$id, $query['relations']], $type);
 						$this->addIncludes($object);
 						continue;
 					}
@@ -297,7 +298,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		{
 			if( ! in_array($prop, $this->relations) )
 			{
-				$this->relations[] = $prop;
+				$this->relations[] = trim($prop);
 			}
 		}
 	}
@@ -331,7 +332,6 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 			{
 				$data = $data->getData();
 			}
-
 			if( ! $this->resolved($data) )
 			{
 				$this->addToQueue($data, $relations);
@@ -393,7 +393,6 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	protected function getNestedRelations($key, $relations)
 	{
 		$nestedRelations = [];
-
 		foreach ($relations as $prop)
 		{
 			if(0 === strpos($prop, $key.'.'))
@@ -405,9 +404,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 				}
 			}
 		}
-
 		$nestedRelations = array_unique($nestedRelations);
-
 		return $nestedRelations;
 	}
 
