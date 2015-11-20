@@ -53,6 +53,20 @@ class Model extends DataTransferObject
 	protected $type;
 
 	/**
+	 * List of guarded model properties
+	 * 
+	 * @var array
+	 */ 
+	protected $guarded = [];
+
+	/**
+	 * Values of guarded model properties
+	 * 
+	 * @var array
+	 */ 
+	protected $protected = [];
+
+	/**
 	 * Creates new Model
 	 * 
 	 * @param stdClass|array $data
@@ -86,6 +100,40 @@ class Model extends DataTransferObject
 		
 		$this->id = $this->data->{$this->idKey};
 		$this->type = $this->data->{$this->typeKey};
+
+		$dataVars = get_object_vars($this->data);
+		foreach ($this->guarded as $guardedProperty)
+		{
+			if( array_key_exists($guardedProperty, $dataVars) )
+			{
+				$this->protected[$guardedProperty] = $this->data->$guardedProperty;
+				unset($this->data->$guardedProperty);
+			}
+		}
+	}
+
+	/**
+	 * Get guarded property
+	 * 
+	 * @return mixed
+	 */
+	public function getGuarded($prop)
+	{
+		if(array_key_exists($prop, $this->protected))
+		{
+			return $this->protected[$prop];
+		}
+		return null;
+	}
+
+	/**
+	 * Set guarded property
+	 * 
+	 * @return mixed
+	 */
+	public function setGuarded($prop, $value)
+	{
+		$this->protected[$prop] = $value;
 	}
 
 	/**
@@ -110,7 +158,9 @@ class Model extends DataTransferObject
 
 	public function __get($name)
 	{
-		if(isset($this->data->{$name}))
+		$vars = get_object_vars($this->data);
+
+		if( array_key_exists($name, $vars) )
 		{
 			if( ! $this->resolved($this->data->{$name}) )
 			{
@@ -119,7 +169,7 @@ class Model extends DataTransferObject
 
 			return $this->data->{$name};
 		}
-
+		
 		throw new Exception('Undefined property: ' . get_class($this) . '::$' . $name);
 	}
 

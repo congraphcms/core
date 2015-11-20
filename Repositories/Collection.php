@@ -14,6 +14,7 @@ use stdClass;
 use Exception;
 use Iterator;
 use Countable;
+use ReflectionClass;
 
 /**
  * Collection class used for data transfer
@@ -34,12 +35,24 @@ class Collection extends DataTransferObject implements Iterator, Countable
 	protected $type;
 
 	/**
+	 * Default model class name
+	 * 
+	 * @var string
+	 */
+	protected $defaultModel = Model::class;
+
+	/**
 	 * Creates new Collection
 	 * 
 	 * @param stdClass|array $data
 	 */
-	public function __construct($data = null)
+	public function __construct($data = null, $defaultModel = null)
 	{
+		if( ! is_null($defaultModel) )
+		{
+			$this->setDefaultModel($defaultModel);
+		}
+
 		parent::__construct($data);
 		$this->isCollection = true;
 	}
@@ -76,6 +89,30 @@ class Collection extends DataTransferObject implements Iterator, Countable
 	}
 
 	/**
+	 * Set default model class
+	 * 
+	 * @param Cookbook\Core\Repositories\Model|string $model
+	 * 
+	 * @throws \InvalidArgumentException
+	 */
+	public function setDefaultModel($model)
+	{
+		if(is_string($model))
+		{
+			$model = new ReflectionClass($model);
+			$model = $model->newInstanceWithoutConstructor();
+		}
+
+		if( $model instanceof Model)
+		{
+			$this->defaultModel = get_class($model);
+			return;
+		}
+
+		throw new \InvalidArgumentException('Collection default model must be instance of ' . Model::class);
+	}
+
+	/**
 	 * Set collection type
 	 * 
 	 * @param mixed $type
@@ -104,7 +141,7 @@ class Collection extends DataTransferObject implements Iterator, Countable
 	{
 		if( ! $item instanceof Model )
 		{
-			$item = new Model($item);
+			$item = new $this->defaultModel($item);
 		}
 
 		$this->data[] = $item;
@@ -148,7 +185,7 @@ class Collection extends DataTransferObject implements Iterator, Countable
 		{
 			if( ! $item instanceof Model )
 			{
-				$item = new Model($item);
+				$item = new $this->defaultModel($item);
 			}
 		}
 

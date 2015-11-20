@@ -14,7 +14,8 @@ use Cookbook\Contracts\Eav\FieldValidatorFactoryContract;
 use Cookbook\Core\Exceptions\ValidationException;
 use Cookbook\Core\Exceptions\NotFoundException;
 use Cookbook\Core\Bus\RepositoryCommand;
-use Illuminate\Support\Facades\Validator as LaravelValidator;
+use Illuminate\Support\Facades\Validator as ValidatorFacade;
+use Illuminate\Validation\Validator as LaravelValidator;
 
 
 /**
@@ -40,6 +41,13 @@ abstract class Validator
 	protected $exception;
 
 	/**
+	 * Validator
+	 * 
+	 * @var \Illuminate\Support\Facades\Validator
+	 */
+	protected $validator;
+
+	/**
 	 * Create new Validator
 	 * 
 	 * @return void
@@ -58,9 +66,19 @@ abstract class Validator
 	 * 
 	 * @return boolean
 	 */      
-	protected function validateParams(array &$params, array $rules, $clean = false)
+	protected function validateParams(array &$params, $rules = null, $clean = false)
 	{
 
+		if( ! is_null($rules) )
+		{
+			// init laravel validator
+			$validator = $this->newValidator($params, $rules);
+			$this->setValidator($validator);
+		}
+		$validator = $this->getValidator();
+
+		$rules = $validator->getRules();
+		
 		if($clean)
 		{
 			$params = $this->cleanParams($params, $rules);
@@ -77,8 +95,8 @@ abstract class Validator
 			$rules = $this->addUniqueRuleException($rules, $params['id']);
 		}
 
-		// init laravel validator
-		$validator = $this->getValidator($params, $rules);
+		
+		
 
 		if ($validator->fails())
 		{
@@ -159,16 +177,36 @@ abstract class Validator
 	/**
 	 * Get validator instance
 	 * 
+	 * @return Illuminate\Validation\Validator
+	 */      
+	public function getValidator()
+	{
+		return $this->validator;
+	}
+
+	/**
+	 * Set new validator instance
+	 * 
 	 * @param array $params
 	 * @param array $rules
 	 * 
 	 * @return Illuminate\Validation\Validator
 	 */      
-	public function getValidator(array $params, array $rules)
+	public function newValidator(array $params, array $rules)
 	{
+		return ValidatorFacade::make($params, $rules);
+	}
 
-		// get validator instance
-		return LaravelValidator::make($params, $rules);
+	/**
+	 * Get validator instance
+	 * 
+	 * @param \Illuminate\Validation\Validator $validator
+	 * 
+	 * @return void
+	 */      
+	public function setValidator(LaravelValidator $validator)
+	{
+		$this->validator = $validator;
 	}
 
 
