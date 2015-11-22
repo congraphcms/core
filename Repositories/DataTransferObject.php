@@ -228,7 +228,14 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 					continue;
 				}
 
-				$result = Resolver::resolve($query['type'], $query['ids'], $query['relations']);
+				$locale = null;
+
+				if( ! empty($this->meta['locale']) )
+				{
+					$locale = $this->meta['locale'];
+				}
+
+				$result = Resolver::resolve($query['type'], $query['ids'], $query['relations'], $locale);
 
 				Trunk::put($result);
 				
