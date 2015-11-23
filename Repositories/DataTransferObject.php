@@ -256,11 +256,26 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		if($includes instanceof Model)
 		{
 			$this->addItemToInclude($includes);
-			return;
 		}
-		foreach ($includes as $item)
+		else
 		{
-			$this->addItemToInclude($item);
+			foreach ($includes as $item)
+			{
+				$this->addItemToInclude($item);
+			}
+		}
+		
+		if($includes instanceof DataTransferObject)
+		{
+			$this->addIncludes($includes->getIncludes());
+		}
+
+		if($this instanceof Collection)
+		{
+			foreach ($this->data as $model)
+			{
+				$model->addIncludes($includes);
+			}
 		}
 	}
 
@@ -286,6 +301,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		if( ! $keyed )
 		{
 			$includes = array_values($includes);
+			$includes = array_unique($includes);
 		}
 
 		return $includes;
@@ -306,6 +322,14 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 			if( ! in_array($prop, $this->relations) )
 			{
 				$this->relations[] = trim($prop);
+			}
+		}
+
+		if($this instanceof Collection)
+		{
+			foreach ($this->data as $model)
+			{
+				$model->addRelations($this->relations);
 			}
 		}
 	}
@@ -551,6 +575,11 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		return json_encode($data, $options);
 	}
 
+	public function __toString()
+	{
+		return $this->toJson(0, false, false);
+	}
+
 
 	// JsonSerializable functions
 
@@ -593,7 +622,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 			if($data instanceof DataTransferObject)
 			{
 				// $data->addIncludes($this->included);
-				$data = $data->transformToArray($data->getData(), $nestedInclude, $this->included);
+				$data = $data->transformToArray($data->getData(), $nestedInclude, $this->included + $extraIncludes);
 			}
 			elseif($data instanceof Carbon)
 			{
@@ -609,7 +638,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		{
 			foreach ($data as $key => &$value)
 			{
-				$value = $this->transformToArray($value, $nestedInclude);
+				$value = $this->transformToArray($value, $nestedInclude, $this->included + $extraIncludes);
 			}
 			
 		}
@@ -690,6 +719,6 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 */
 	protected function objectKey($object)
 	{
-		return base64_encode(json_encode(['id' => $object->id, 'type' => $object->type]));
+		return base64_encode(json_encode(['id' => $object->id, 'type' => $object->type, 'relations' => $this->relations]));
 	}
 }
