@@ -72,30 +72,12 @@ abstract class Validator
 		if( ! is_null($rules) )
 		{
 			// init laravel validator
-			$validator = $this->newValidator($params, $rules);
+			$validator = $this->newValidator($params, $rules, $clean);
 			$this->setValidator($validator);
 		}
 		$validator = $this->getValidator();
 
 		$rules = $validator->getRules();
-		
-		if($clean)
-		{
-			$params = $this->cleanParams($params, $rules);
-		}
-
-		// if validating update params 
-		// unique rule should skip entry with this id
-		
-		// check if these are update params
-		if(!empty($params['id']))
-		{
-
-			// add exception for this id on all unique rules
-			$rules = $this->addUniqueRuleException($rules, $params['id']);
-		}
-
-		
 		
 
 		if ($validator->fails())
@@ -146,6 +128,11 @@ abstract class Validator
 		// update all unique rules
 		foreach ($rules as $key => &$rule)
 		{
+			if(is_array($rule))
+			{
+				$rule = $this->addUniqueRuleException($rule, $id);
+				continue;
+			}
 			// check for unique rule
 			$unique_pos = strpos($rule, 'unique:');
 			// if rule has unique restriction
@@ -192,8 +179,24 @@ abstract class Validator
 	 * 
 	 * @return Illuminate\Validation\Validator
 	 */      
-	public function newValidator(array $params, array $rules)
+	public function newValidator(array $params, array $rules, $clean = true)
 	{
+		// if validating update params 
+		// unique rule should skip entry with this id
+		
+		// check if these are update params
+		if(!empty($params['id']))
+		{
+
+			// add exception for this id on all unique rules
+			$rules = $this->addUniqueRuleException($rules, $params['id']);
+		}
+
+		if($clean)
+		{
+			$params = $this->cleanParams($params, $rules);
+		}
+		
 		return ValidatorFacade::make($params, $rules);
 	}
 
