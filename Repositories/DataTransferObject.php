@@ -13,6 +13,7 @@ namespace Cookbook\Core\Repositories;
 use stdClass;
 use ArrayAccess;
 use Exception;
+use Closure;
 use Cookbook\Core\Facades\Resolver;
 use Cookbook\Core\Facades\Trunk;
 use Illuminate\Contracts\Support\Arrayable;
@@ -141,8 +142,11 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		{
 			return $this->meta;
 		}
-
-		return $this->meta[$key];
+		if( isset($this->meta[$key]) )
+		{
+			return $this->meta[$key];
+		}
+		return null;
 	}
 
 	/**
@@ -532,9 +536,9 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 *
 	 * @return array
 	 */
-	public function toArray($includeMetaData = false, $nestedInclude = true)
+	public function toArray($includeMetaData = false, $nestedInclude = true, $callback = null)
 	{
-		$data = $this->transformToArray($this->data, $nestedInclude);
+		$data = $this->transformToArray($this->data, $nestedInclude, [], $callback);
 		
 		if( ! $includeMetaData )
 		{
@@ -546,7 +550,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		
 		if( ! empty($this->included) && ! $nestedInclude && $includeMetaData)
 		{
-			$result['included'] = $this->transformToArray($this->getIncludes(), false);
+			$result['included'] = $this->transformToArray($this->getIncludes(), false, [], $callback);
 		}
 
 		if( $includeMetaData && ! empty($this->meta) )
@@ -569,9 +573,9 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 *
 	 * @return string
 	 */
-	public function toJson($options = 0, $includeMetaData = false, $nestedInclude = true)
+	public function toJson($options = 0, $includeMetaData = false, $nestedInclude = true, $callback = null)
 	{
-		$data = $this->toArray($includeMetaData, $nestedInclude);
+		$data = $this->toArray($includeMetaData, $nestedInclude, $callback);
 		return json_encode($data, $options);
 	}
 
@@ -600,7 +604,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * 
 	 * @return array
 	 */
-	public function transformToArray($data, $nestedInclude = true, $extraIncludes = [])
+	public function transformToArray($data, $nestedInclude = true, $extraIncludes = [], $callback = null)
 	{
 		if (is_object($data))
 		{
@@ -638,11 +642,69 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		{
 			foreach ($data as $key => &$value)
 			{
-				$value = $this->transformToArray($value, $nestedInclude, $this->included + $extraIncludes);
+				$data = $this->transformAttribute($data, $key, $value, $nestedInclude, $this->included + $extraIncludes, $callback);
 			}
 			
 		}
+
+		if(is_callable($callback))
+		{
+			$data = call_user_func_array($callback, [[], 0, $data, $nestedInclude, $extraIncludes]);
+		}
+
 		return $data;
+	}
+
+	protected function transformAttribute($array, $key, $value, $nestedInclude, $extraIncludes, $callback = null)
+	{
+		if (is_object($value))
+		{
+			if( $nestedInclude && ! $this->resolved($value) )
+			{
+				$objectKey = $this->objectKey($value);
+				
+				if(array_key_exists($objectKey, $extraIncludes))
+				{
+					$value = $extraIncludes[$objectKey];
+				}
+				else
+				{
+					$value = $this->getIncluded($value);
+				}
+				
+			}
+
+			if($value instanceof DataTransferObject)
+			{
+				// $data->addIncludes($this->included);
+				$value = $value->transformToArray($value->getData(), $nestedInclude, $this->included + $extraIncludes);
+			}
+			elseif($value instanceof Carbon)
+			{
+				$value = $value->tz('UTC')->toIso8601String();
+			}
+			else
+			{
+				$value = get_object_vars($value);
+			}
+		}
+		
+		if ( is_array($value) && ! empty($value) )
+		{
+			foreach ($value as $k => $v)
+			{
+				$value = $this->transformAttribute($value, $k, $v, $nestedInclude, $this->included + $extraIncludes, $callback);
+			}
+			
+		}
+
+		if(is_callable($callback))
+		{
+			$value = call_user_func_array($callback, [$array, $key, $value, $nestedInclude, $extraIncludes]);
+		}
+		
+		$array[$key] = $value;
+		return $array;
 	}
 
 	/**
