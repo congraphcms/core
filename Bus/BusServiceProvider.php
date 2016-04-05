@@ -6,12 +6,7 @@ use Illuminate\Support\ServiceProvider;
 
 class BusServiceProvider extends ServiceProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
+
 
     /**
      * Register the service provider.
@@ -33,19 +28,5 @@ class BusServiceProvider extends ServiceProvider
         $this->app->alias(
             'Cookbook\Core\Bus\CommandDispatcher', 'Illuminate\Contracts\Bus\QueueingDispatcher'
         );
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [
-            'Cookbook\Core\Bus\CommandDispatcher',
-            'Illuminate\Contracts\Bus\Dispatcher',
-            'Illuminate\Contracts\Bus\QueueingDispatcher',
-        ];
     }
 }
