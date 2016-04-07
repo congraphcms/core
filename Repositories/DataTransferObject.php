@@ -31,7 +31,7 @@ use Carbon\Carbon;
  */
 abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 {
-
+	protected $counter = 0;
 	/**
 	 * Main transfer data
 	 * 
@@ -606,8 +606,10 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 */
 	public function transformToArray($data, $nestedInclude = true, $extraIncludes = [], $callback = null)
 	{
+
 		if (is_object($data))
 		{
+
 			if( $nestedInclude && ! $this->resolved($data) )
 			{
 				$objectKey = $this->objectKey($data);
@@ -637,12 +639,17 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 				$data = get_object_vars($data);
 			}
 		}
+
+
 		
 		if ( is_array($data) && ! empty($data) )
 		{
+
 			foreach ($data as $key => &$value)
 			{
-				$data = $this->transformAttribute($data, $key, $value, $nestedInclude, $this->included + $extraIncludes, $callback);
+				// var_dump($data);
+				// echo "key: " . $key . ' -> ' . $value;
+				$this->transformAttribute($data, $key, $value, $nestedInclude, $this->included + $extraIncludes, $callback);
 			}
 			
 		}
@@ -655,10 +662,16 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		return $data;
 	}
 
-	protected function transformAttribute($array, $key, $value, $nestedInclude, $extraIncludes, $callback = null)
+	protected function transformAttribute(&$array, $key, $value, $nestedInclude, $extraIncludes, $callback = null)
 	{
+		// // echo $key . ' = ' . $value . ' ';
+		// $this->counter++;
+		// if($this->counter > 10) {
+		// 	die();
+		// }
 		if (is_object($value))
 		{
+
 			if( $nestedInclude && ! $this->resolved($value) )
 			{
 				$objectKey = $this->objectKey($value);
@@ -691,12 +704,14 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		
 		if ( is_array($value) && ! empty($value) )
 		{
+
 			foreach ($value as $k => $v)
 			{
-				$value = $this->transformAttribute($value, $k, $v, $nestedInclude, $this->included + $extraIncludes, $callback);
+				$this->transformAttribute($value, $k, $v, $nestedInclude, $this->included + $extraIncludes, $callback);
 			}
 			
 		}
+
 
 		if(is_callable($callback))
 		{
@@ -704,7 +719,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		}
 		
 		$array[$key] = $value;
-		return $array;
+
 	}
 
 	/**
