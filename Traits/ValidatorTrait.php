@@ -11,6 +11,12 @@
 namespace Cookbook\Core\Traits;
 
 use Illuminate\Contracts\Validation\Factory as ValidatorFactoryContract;
+use Cookbook\Contracts\Eav\FieldValidatorFactoryContract;
+use Cookbook\Core\Exceptions\ValidationException;
+use Cookbook\Core\Exceptions\NotFoundException;
+use Cookbook\Core\Bus\Command;
+use Illuminate\Support\Facades\Validator as ValidatorFacade;
+use Illuminate\Validation\Validator as LaravelValidator;
 
 /**
  * Trait for validating input parameters 
@@ -27,15 +33,19 @@ use Illuminate\Contracts\Validation\Factory as ValidatorFactoryContract;
 trait ValidatorTrait
 {
 
-	use ErrorManagerTrait;
+	/**
+	 * validation exception that will be thrown if validation fails
+	 *
+	 * @var Cookbook\Core\Exceptions\ValidationException
+	 */
+	protected $exception = null;
 
 	/**
-	 * Validator factory
-	 *
-	 * @var Illuminate\Validation\Factory
+	 * Validator
+	 * 
+	 * @var \Illuminate\Support\Facades\Validator
 	 */
-	protected $validatorFactory;
-
+	protected $validator;
 
 	/**
 	 * Validate params by given rules
@@ -46,39 +56,26 @@ trait ValidatorTrait
 	 * 
 	 * @return boolean
 	 */      
-	protected function validateParams(array &$params, array $rules, $clean = false)
+	protected function validateParams(array &$params, $rules = null, $clean = false)
 	{
 
-		if($clean)
+		if( ! is_null($rules) )
 		{
-			$params = $this->cleanParams($params, $rules);
+			// init laravel validator
+			$validator = $this->newValidator($params, $rules, $clean);
+			$this->setValidator($validator);
 		}
+		$validator = $this->getValidator();
 
-		// if validating update params 
-		// unique rule should skip entry with this id
+		$rules = $validator->getRules();
 		
-		// check if these are update params
-		if(!empty($params['id']))
-		{
-
-			// add exception for this id on all unique rules
-			$rules = $this->addUniqueRuleException($rules, $params['id']);
-		}
-
-		// init laravel validator
-		$validator = $this->getValidator($params, $rules);
 
 		if ($validator->fails())
 		{
 			// params did not pass validation rules
 			
-			// get validator errors
-			$messages = $validator->messages();
-
-			
-
-			// add errors to bag
-			$this->addErrors($messages);
+			// add errors to exception
+			$this->getException()->addErrors($validator->errors()->toArray());
 
 			return false;
 		}
@@ -87,32 +84,6 @@ trait ValidatorTrait
 			// params passed validation rules
 			return true;
 		}
-	}
-
-	/**
-	 * Set validator factory
-	 * 
-	 * @param Illuminate\Contracts\Validation\Factory $factory
-	 * 
-	 * @return void
-	 */ 
-	public function setValidatorFactory(ValidatorFactoryContract $factory){
-		$this->validatorFactory = $factory;
-	}
-
-	/**
-	 * Get validator instance
-	 * 
-	 * @param array $params
-	 * @param array $rules
-	 * 
-	 * @return Illuminate\Validation\Validator
-	 */      
-	public function getValidator(array $params, array $rules)
-	{
-
-		// get validator instance
-		return $this->validatorFactory->make($params, $rules);
 	}
 
 	/**
@@ -147,6 +118,11 @@ trait ValidatorTrait
 		// update all unique rules
 		foreach ($rules as $key => &$rule)
 		{
+			if(is_array($rule))
+			{
+				$rule = $this->addUniqueRuleException($rule, $id);
+				continue;
+			}
 			// check for unique rule
 			$unique_pos = strpos($rule, 'unique:');
 			// if rule has unique restriction
@@ -174,4 +150,82 @@ trait ValidatorTrait
 		return $rules;
 
 	}
+
+	/**
+	 * Get validator instance
+	 * 
+	 * @return Illuminate\Validation\Validator
+	 */      
+	public function getValidator()
+	{
+		return $this->validator;
+	}
+
+	/**
+	 * Set new validator instance
+	 * 
+	 * @param array $params
+	 * @param array $rules
+	 * 
+	 * @return Illuminate\Validation\Validator
+	 */      
+	public function newValidator(array &$params, array $rules, $clean = true)
+	{
+		// if validating update params 
+		// unique rule should skip entry with this id
+		
+		// check if these are update params
+		if(!empty($params['id']))
+		{
+
+			// add exception for this id on all unique rules
+			$rules = $this->addUniqueRuleException($rules, $params['id']);
+		}
+
+		if($clean)
+		{
+			$params = $this->cleanParams($params, $rules);
+		}
+		
+		return ValidatorFacade::make($params, $rules);
+	}
+
+	/**
+	 * Get validator instance
+	 * 
+	 * @param \Illuminate\Validation\Validator $validator
+	 * 
+	 * @return void
+	 */      
+	public function setValidator(LaravelValidator $validator)
+	{
+		$this->validator = $validator;
+	}
+
+	/**
+	 * Get exception instance
+	 * 
+	 * @param \Illuminate\Validation\Validator $validator
+	 * 
+	 * @return void
+	 */      
+	public function getException()
+	{
+		if($this->exception == null) {
+			$this->exception = new ValidationException();
+		}
+
+		return $this->exception;
+	}
+
+
+	/**
+	 * Validate command
+	 * 
+	 * @param Cookbook\Core\Bus\RepositoryCommand $command
+	 * 
+	 * @return void
+	 */
+	abstract public function validate(Command $command);
+	
 }

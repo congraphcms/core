@@ -13,7 +13,6 @@ namespace Cookbook\Core\Bus;
 use Closure;
 use Illuminate\Bus\Dispatcher;
 use Cookbook\Contracts\Core\ValidationCommandDispatcherContract;
-use Cookbook\Contracts\Core\SelfValidating;
 use Illuminate\Support\Facades\Event;
 
 /**
@@ -150,6 +149,10 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	 */
 	public function validate($command)
 	{
+		if ($command instanceof SelfValidating) {
+            return $this->container->call([$command, 'validate']);
+        }
+        
 		$validator = $this->container->make($this->getValidatorClass($command));
 		$method = $this->getValidatorMethod($command);
 
@@ -164,11 +167,6 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	 */
 	public function getValidatorClass($command)
 	{
-		if ($command instanceof SelfValidating)
-		{
-			return get_class($command);
-		}
-
 		return $this->inflectValidatorSegment($command, 0);
 	}
 
