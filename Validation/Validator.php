@@ -179,13 +179,13 @@ abstract class Validator
 	 * 
 	 * @return Illuminate\Validation\Validator
 	 */      
-	public function newValidator(array &$params, array $rules, $clean = true)
+	public function newValidator(array &$params, array $rules, $clean = true, $uniqueException = true)
 	{
 		// if validating update params 
 		// unique rule should skip entry with this id
 		
 		// check if these are update params
-		if(!empty($params['id']))
+		if(!empty($params['id']) && $uniqueException)
 		{
 
 			// add exception for this id on all unique rules
