@@ -60,26 +60,25 @@ abstract class Validator
 	/**
 	 * Validate params by given rules
 	 * 
-	 * @param $params 		array 	- input parameters
+	 * @param $command 		array 	- input parameters
 	 * @param $rules 		array 	- rules for validator
 	 * @param $clean 		boolean - whether to unset params that are not in rules
 	 * 
 	 * @return boolean
 	 */      
-	protected function validateParams(array &$params, $rules = null, $clean = false)
+	protected function validateParams(&$command, $rules = null, $clean = false, $addUniqueRuleException = true)
 	{
 
 		if( ! is_null($rules) )
 		{
 			// init laravel validator
-			$validator = $this->newValidator($params, $rules, $clean);
+			$validator = $this->newValidator($command, $rules, $clean, $addUniqueRuleException);
 			$this->setValidator($validator);
 		}
 		$validator = $this->getValidator();
 
 		$rules = $validator->getRules();
 		
-
 		if ($validator->fails())
 		{
 			// params did not pass validation rules
@@ -122,7 +121,7 @@ abstract class Validator
 	 * 
 	 * @return array
 	 */      
-	protected function addUniqueRuleException(array $rules, $id)
+	protected function addUniqueRuleException(array $rules, $uniqueParamKey, $uniqueParamExistingValue)
 	{
 
 		// update all unique rules
@@ -130,7 +129,7 @@ abstract class Validator
 		{
 			if(is_array($rule))
 			{
-				$rule = $this->addUniqueRuleException($rule, $id);
+				$rule = $this->addUniqueRuleException($rule, $uniqueParamKey, $uniqueParamExistingValue);
 				continue;
 			}
 			// check for unique rule
@@ -146,14 +145,23 @@ abstract class Validator
 				if($next_rule_pos !== false)
 				{
 					$insert_pos = $next_rule_pos;
+					$length = 0;
 				}
 				else
 				{
 					$insert_pos = strlen($rule);
+					$length = 0;
+				}
+
+				$additionalWherePos = strpos($rule, ',NULL,'.$uniqueParamKey.',', $unique_pos);
+				if($additionalWherePos !== false)
+				{
+					$insert_pos = $additionalWherePos;
+					$length = 6 + strlen($uniqueParamKey);
 				}
 
 				// add exception for this id
-				$rule = substr_replace($rule, ',' . $id . ',id', $insert_pos, 0);
+				$rule = substr_replace($rule, ',' . $uniqueParamExistingValue . ',' . $uniqueParamKey, $insert_pos, $length);
 			}
 		}
 
@@ -174,30 +182,36 @@ abstract class Validator
 	/**
 	 * Set new validator instance
 	 * 
-	 * @param array $params
+	 * @param array $command
 	 * @param array $rules
 	 * 
 	 * @return Illuminate\Validation\Validator
 	 */      
-	public function newValidator(array &$params, array $rules, $clean = true, $uniqueException = true)
+	public function newValidator(&$command, array $rules, $clean = true, $uniqueException = true)
 	{
 		// if validating update params 
 		// unique rule should skip entry with this id
-		
-		// check if these are update params
-		if(!empty($params['id']) && $uniqueException)
-		{
+		if($command->id) {
+			if(is_string($uniqueException))
+			{
+				// add exception for this id on all unique rules
+				$rules = $this->addUniqueRuleException($rules, $uniqueException, $command->id);
+			}
 
-			// add exception for this id on all unique rules
-			$rules = $this->addUniqueRuleException($rules, $params['id']);
+			if($uniqueException === true)
+			{
+				// add exception for this id on all unique rules
+				$rules = $this->addUniqueRuleException($rules, 'id', $command->id);
+			}
 		}
+		
 
 		if($clean)
 		{
-			$params = $this->cleanParams($params, $rules);
+			$command->params = $this->cleanParams($command->params, $rules);
 		}
 		
-		return ValidatorFacade::make($params, $rules);
+		return ValidatorFacade::make($command->params, $rules);
 	}
 
 	/**
