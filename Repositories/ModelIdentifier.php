@@ -45,7 +45,7 @@ class ModelIdentifier extends DataTransferObject
 	 */
 	public function __construct($data = null)
 	{
-		parent::__construct($data);
+		$this->setData($data);
 		$this->isCollection = false;
 		$this->resolved = false;
 	}
@@ -60,6 +60,7 @@ class ModelIdentifier extends DataTransferObject
 		if( is_null($data) )
 		{
 			$data = new stdClass();
+			return;
 		}
 
 		if( $data instanceof stdClass )

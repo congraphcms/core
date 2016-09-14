@@ -46,14 +46,14 @@ class Collection extends DataTransferObject implements Iterator, Countable
 	 * 
 	 * @param stdClass|array $data
 	 */
-	public function __construct($data = null, $defaultModel = null)
+	public function __construct($data = null, $params = [], $meta = [], $defaultModel = null)
 	{
 		if( ! is_null($defaultModel) )
 		{
 			$this->setDefaultModel($defaultModel);
 		}
 
-		parent::__construct($data);
+		parent::__construct($data, $params, $meta);
 		$this->isCollection = true;
 	}
 
