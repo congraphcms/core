@@ -81,6 +81,34 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 */
 	protected static $loadQueue = [];
 
+	/**
+	 * ID property name
+	 * 
+	 * @var string
+	 */
+	protected $idKey = 'id';
+
+	/**
+	 * Type property name
+	 * 
+	 * @var string
+	 */
+	protected $typeKey = '__type';
+
+	/**
+	 * Object ID
+	 * 
+	 * @var mixed
+	 */
+	protected $id;
+
+	/**
+	 * Object Type
+	 * 
+	 * @var mixed
+	 */
+	protected $type;
+
 
 	/**
 	 * Creates new DataTransferObject
@@ -91,6 +119,36 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	{
 		$this->setData($data);
 		Trunk::put($this);
+	}
+
+	/**
+	 * Get model type
+	 * 
+	 * @return mixed
+	 */
+	public function getType()
+	{
+		return $this->type;
+	}
+
+	/**
+	 * Get model type key
+	 * 
+	 * @return mixed
+	 */
+	public function getTypeKey()
+	{
+		return $this->typeKey;
+	}
+
+	/**
+	 * Set model type key
+	 * 
+	 * @return mixed
+	 */
+	public function setTypeKey($key)
+	{
+		$this->typeKey = $key;
 	}
 
 	/**
@@ -203,6 +261,116 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	}
 
 	/**
+	 * Add relation properties
+	 * 
+	 * @param array | string $relations
+	 * 
+	 * @return void
+	 */
+	public function addRelations($relations)
+	{
+		$relations = ( is_array($relations) ) ? $relations : explode(',', strval($relations));
+		foreach ($relations as $prop)
+		{
+			if( ! in_array($prop, $this->relations) )
+			{
+				$this->relations[] = trim($prop);
+			}
+		}
+
+		if($this instanceof Collection)
+		{
+			foreach ($this->data as $model)
+			{
+				$model->addRelations($this->relations);
+			}
+		}
+	}
+
+	/**
+	 * Empty resolve queue
+	 * 
+	 * @return void
+	 */
+	protected function clearQueue()
+	{
+		self::$loadQueue = [];
+	}
+
+	/**
+	 * Put unresolved relations to resolve queue
+	 * 
+	 * @param  mixed $data
+	 * @param  array $relations
+	 * @return void
+	 */
+	public function queueUnresolvedObjects($data, $relations)
+	{
+		if( is_object($data) )
+		{
+
+			if( $data instanceof Model )
+			{
+				$data = $data->getData();
+			}
+
+			if( $data instanceof ModelIdentifier )
+			{
+				if($data->resolved)
+				{
+					$this->addIncludes($data->resolver);
+					return;
+				}
+
+				$this->addToQueue($data, $relations);
+				return;
+			}
+
+			$data = get_object_vars($data);
+
+		}
+
+		if( is_array($data) )
+		{
+			foreach ($data as $key => $value)
+			{
+				if($this->hasRelation($key, $relations))
+				{
+					$nestedRelations = $this->getNestedRelations($key, $relations);
+					$this->queueUnresolvedObjects($value, $nestedRelations);
+				}
+				if(is_int($key))
+				{
+					$this->queueUnresolvedObjects($value, $relations);
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * Put unresolved object to resolve queue
+	 * 
+	 * @param  ModelIdentifier $object
+	 * @param  array $relations
+	 * @return void
+	 */
+	protected function addToQueue($object, $relations)
+	{
+		if( ! array_key_exists($object->getType(), self::$loadQueue) )
+		{
+			self::$loadQueue[$object->getType()] = [];
+		}
+		$relationsKey = base64_encode(json_encode($relations));
+		if( ! array_key_exists($relationsKey, self::$loadQueue[$object->getType()]) )
+		{
+			self::$loadQueue[$object->getType()][$relationsKey] = [ 'type' => $object->getType(), 'ids' => [], 'relations' => $relations ];
+		}
+		self::$loadQueue[$object->getType()][$relationsKey]['ids'][] = $object->getId();
+
+	}
+
+	/**
 	 * Load objects from queue
 	 * 
 	 * @return void
@@ -310,91 +478,9 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 
 		return $includes;
 	}
+	
 
-	/**
-	 * Add relation properties
-	 * 
-	 * @param array | string $relations
-	 * 
-	 * @return void
-	 */
-	public function addRelations($relations)
-	{
-		$relations = ( is_array($relations) ) ? $relations : explode(',', strval($relations));
-		foreach ($relations as $prop)
-		{
-			if( ! in_array($prop, $this->relations) )
-			{
-				$this->relations[] = trim($prop);
-			}
-		}
-
-		if($this instanceof Collection)
-		{
-			foreach ($this->data as $model)
-			{
-				$model->addRelations($this->relations);
-			}
-		}
-	}
-
-	protected function addToQueue($object, $relations)
-	{
-		if( ! array_key_exists($object->type, self::$loadQueue) )
-		{
-			self::$loadQueue[$object->type] = [];
-		}
-		$relationsKey = base64_encode(json_encode($relations));
-		if( ! array_key_exists($relationsKey, self::$loadQueue[$object->type]) )
-		{
-			self::$loadQueue[$object->type][$relationsKey] = [ 'type' => $object->type, 'ids' => [], 'relations' => $relations ];
-		}
-		self::$loadQueue[$object->type][$relationsKey]['ids'][] = $object->id;
-
-	}
-
-	protected function clearQueue()
-	{
-		self::$loadQueue = [];
-	}
-
-	public function queueUnresolvedObjects($data, $relations)
-	{
-		if( is_object($data) )
-		{
-
-			if( $data instanceof Model )
-			{
-				$data = $data->getData();
-			}
-			if( ! $this->resolved($data) )
-			{
-				$this->addToQueue($data, $relations);
-				return;
-			}
-
-			$data = get_object_vars($data);
-
-		}
-
-		if( is_array($data) )
-		{
-			foreach ($data as $key => $value)
-			{
-				if($this->hasRelation($key, $relations))
-				{
-					$nestedRelations = $this->getNestedRelations($key, $relations);
-					$this->queueUnresolvedObjects($value, $nestedRelations);
-				}
-				if(is_int($key))
-				{
-					$this->queueUnresolvedObjects($value, $relations);
-				}
-			}
-		}
-
-
-	}
+	
 
 	/**
 	 * Check if relation exists
@@ -610,7 +696,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		if (is_object($data))
 		{
 
-			if( $nestedInclude && ! $this->resolved($data) )
+			if( $nestedInclude && $data instanceof ModelIdentifier )
 			{
 				$objectKey = $this->objectKey($data);
 				
@@ -672,7 +758,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		if (is_object($value))
 		{
 
-			if( $nestedInclude && ! $this->resolved($value) )
+			if( $nestedInclude && $value instanceof ModelIdentifier && ! $value->resolved)
 			{
 				$objectKey = $this->objectKey($value);
 				
@@ -723,29 +809,6 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	}
 
 	/**
-	 * Check if object is resolved
-	 * @return object $obj
-	 */
-	protected function resolved($obj)
-	{
-		if( ! is_object($obj) )
-		{
-			return true;
-		}
-
-		$data = get_object_vars($obj);
-		if( count($data) == 2
-			&& array_key_exists('id', $data)
-			&& array_key_exists('type', $data)
-		)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Get resolved object form trunk if possible
 	 * 
 	 * @param  object $obj
@@ -754,9 +817,9 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 */
 	protected function resolve($obj)
 	{
-		if(Trunk::has($obj->id, $obj->type))
+		if(Trunk::has($obj->getId(), $obj->getType()))
 		{
-			return $data = Trunk::get($obj->id, $obj->type);
+			return $data = Trunk::get($obj->getId(), $obj->getType());
 		}
 
 		return $obj;
@@ -796,6 +859,6 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 */
 	protected function objectKey($object)
 	{
-		return base64_encode(json_encode(['id' => $object->id, 'type' => $object->type, 'relations' => $this->relations]));
+		return base64_encode(json_encode(['id' => $object->getId(), 'type' => $object->getType(), 'relations' => $this->relations]));
 	}
 }

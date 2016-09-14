@@ -14,7 +14,7 @@ use stdClass;
 use Exception;
 
 /**
- * Model class used for data transfer
+ * ModelIdentifier class used for data transfer
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
@@ -22,26 +22,24 @@ use Exception;
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
-class Model extends DataTransferObject
+class ModelIdentifier extends DataTransferObject
 {
-	
-
 	/**
-	 * List of guarded model properties
+	 * Flag if this identifier is resolved
 	 * 
-	 * @var array
-	 */ 
-	protected $guarded = [];
+	 * @var boolean
+	 */
+	public $resolved;
 
 	/**
-	 * Values of guarded model properties
+	 * Model for this identifier
 	 * 
-	 * @var array
-	 */ 
-	protected $protected = [];
+	 * @var Model
+	 */
+	public $resolver;
 
 	/**
-	 * Creates new Model
+	 * Creates new ModelIdentifier
 	 * 
 	 * @param stdClass|array $data
 	 */
@@ -49,6 +47,7 @@ class Model extends DataTransferObject
 	{
 		parent::__construct($data);
 		$this->isCollection = false;
+		$this->resolved = false;
 	}
 
 	/**
@@ -71,43 +70,20 @@ class Model extends DataTransferObject
 		{
 			$this->data = (object) $data;
 		}
+
+		if($data instanceof Model)
+		{
+			$this->data = new stdClass();
+			$this->data->{$data->getIdKey()} = $data->getId();
+			$this->data->{$data->getTypeKey()} = $data->getType();
+			$this->idKey = $data->getIdKey();
+			$this->typeKey = $data->getTypeKey();
+			$this->resolved = true;
+			$this->resolver = $data;
+		}
 		
 		$this->id = $this->data->{$this->idKey};
 		$this->type = $this->data->{$this->typeKey};
-
-		$dataVars = get_object_vars($this->data);
-		foreach ($this->guarded as $guardedProperty)
-		{
-			if( array_key_exists($guardedProperty, $dataVars) )
-			{
-				$this->protected[$guardedProperty] = $this->data->$guardedProperty;
-				unset($this->data->$guardedProperty);
-			}
-		}
-	}
-
-	/**
-	 * Get guarded property
-	 * 
-	 * @return mixed
-	 */
-	public function getGuarded($prop)
-	{
-		if(array_key_exists($prop, $this->protected))
-		{
-			return $this->protected[$prop];
-		}
-		return null;
-	}
-
-	/**
-	 * Set guarded property
-	 * 
-	 * @return mixed
-	 */
-	public function setGuarded($prop, $value)
-	{
-		$this->protected[$prop] = $value;
 	}
 
 	/**
@@ -146,15 +122,6 @@ class Model extends DataTransferObject
 
 		if( array_key_exists($name, $vars) )
 		{
-			if( $this->data->{$name} instanceof ModelIdentifier )
-			{
-				if($this->data->{$name}->resolved) {
-					return $this->data{$name}->resolver;
-				}
-
-				return $this->data->{$name};
-			}
-
 			return $this->data->{$name};
 		}
 		
@@ -163,27 +130,6 @@ class Model extends DataTransferObject
 
 	public function __set($name, $value)
 	{
-		if($value instanceof Model)
-		{
-			$identifier = new ModelIdentifier($value);
-			$this->data->{$name} = $identifier;
-			return;
-		}
-
-		if($value instanceof Collection)
-		{
-			$unresolvedCollection = [];
-			foreach ($value as $item)
-			{
-				$identifier = new ModelIdentifier($item);
-				$unresolvedCollection[] = $identifier;
-			}
-
-			$this->data->{$name} = $unresolvedCollection;
-			
-			return;
-		}
-
 		if($name == $this->idKey)
 		{
 			$this->id = $value;
