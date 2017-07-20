@@ -31,7 +31,7 @@ use Illuminate\Validation\Validator as LaravelValidator;
  * @version  	0.1.0-alpha
  */
 abstract class Validator
-{
+{ /// nidje veze
 
 	/**
 	 * validation exception that will be thrown if validation fails
