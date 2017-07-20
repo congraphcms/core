@@ -24,7 +24,33 @@ use Exception;
  */
 class Model extends DataTransferObject
 {
-	
+	/**
+	 * ID property name
+	 * 
+	 * @var string
+	 */
+	protected $idKey = 'id';
+
+	/**
+	 * Type property name
+	 * 
+	 * @var string
+	 */
+	protected $typeKey = 'type';
+
+	/**
+	 * Object ID
+	 * 
+	 * @var mixed
+	 */
+	protected $id;
+
+	/**
+	 * Object Type
+	 * 
+	 * @var mixed
+	 */
+	protected $type;
 
 	/**
 	 * List of guarded model properties
@@ -121,23 +147,13 @@ class Model extends DataTransferObject
 	}
 
 	/**
-	 * Get model ID key
+	 * Get model type
 	 * 
 	 * @return mixed
 	 */
-	public function getIdKey()
+	public function getType()
 	{
-		return $this->idKey;
-	}
-
-	/**
-	 * Set model ID key
-	 * 
-	 * @return mixed
-	 */
-	public function setIdKey($key)
-	{
-		$this->idKey = $key;
+		return $this->type;
 	}
 
 	public function __get($name)
@@ -146,13 +162,9 @@ class Model extends DataTransferObject
 
 		if( array_key_exists($name, $vars) )
 		{
-			if( $this->data->{$name} instanceof ModelIdentifier )
+			if( ! $this->resolved($this->data->{$name}) )
 			{
-				if($this->data->{$name}->resolved) {
-					return $this->data{$name}->resolver;
-				}
-
-				return $this->data->{$name};
+				return $this->resolve($this->data->{$name});
 			}
 
 			return $this->data->{$name};
@@ -165,8 +177,10 @@ class Model extends DataTransferObject
 	{
 		if($value instanceof Model)
 		{
-			$identifier = new ModelIdentifier($value);
-			$this->data->{$name} = $identifier;
+			$unresolvedValue = new stdClass();
+			$unresolvedValue->id = $value->id;
+			$unresolvedValue->type = $value->type;
+			$this->data->{$name} = $unresolvedValue;
 			return;
 		}
 
@@ -175,8 +189,10 @@ class Model extends DataTransferObject
 			$unresolvedCollection = [];
 			foreach ($value as $item)
 			{
-				$identifier = new ModelIdentifier($item);
-				$unresolvedCollection[] = $identifier;
+				$unresolvedValue = new stdClass();
+				$unresolvedValue->id = $item->id;
+				$unresolvedValue->type = $item->type;
+				$unresolvedCollection[] = $unresolvedValue;
 			}
 
 			$this->data->{$name} = $unresolvedCollection;
