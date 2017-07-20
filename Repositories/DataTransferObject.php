@@ -93,7 +93,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * 
 	 * @var string
 	 */
-	protected $typeKey = '__type';
+	protected $typeKey = 'type';
 
 	/**
 	 * Object ID
