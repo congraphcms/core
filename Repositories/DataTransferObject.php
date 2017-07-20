@@ -115,11 +115,9 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * 
 	 * @param stdClass|array $data
 	 */
-	public function __construct($data, $params = [], $meta = [])
+	public function __construct($data)
 	{
 		$this->setData($data);
-		$this->setParams($params);
-		$this->setMeta($meta);
 		Trunk::put($this);
 	}
 
