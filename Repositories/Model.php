@@ -45,9 +45,9 @@ class Model extends DataTransferObject
 	 * 
 	 * @param stdClass|array $data
 	 */
-	public function __construct($data = null, $params = [], $meta = [])
+	public function __construct($data = null)
 	{
-		parent::__construct($data, $params, $meta);
+		parent::__construct($data);
 		$this->isCollection = false;
 	}
 
