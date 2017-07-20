@@ -81,33 +81,6 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 */
 	protected static $loadQueue = [];
 
-	/**
-	 * ID property name
-	 * 
-	 * @var string
-	 */
-	protected $idKey = 'id';
-
-	/**
-	 * Type property name
-	 * 
-	 * @var string
-	 */
-	protected $typeKey = 'type';
-
-	/**
-	 * Object ID
-	 * 
-	 * @var mixed
-	 */
-	protected $id;
-
-	/**
-	 * Object Type
-	 * 
-	 * @var mixed
-	 */
-	protected $type;
 
 	/**
 	 * Creates new DataTransferObject
