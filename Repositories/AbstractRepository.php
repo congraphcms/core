@@ -463,6 +463,8 @@ abstract class AbstractRepository implements RepositoryContract
 		if( ! empty($limit) )
 		{
 			$query->take($limit);
+		} else {
+			$query->take(100);
 		}
 
 		return $query;
