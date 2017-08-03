@@ -203,6 +203,189 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	}
 
 	/**
+	 * Add relation properties
+	 * 
+	 * @param array | string $relations
+	 * 
+	 * @return void
+	 */
+	public function addRelations($relations)
+	{
+		if(is_numeric($relations))
+		{
+			
+			$relations = intval($relations);
+			$this->relations = $relations;
+		}
+		else
+		{
+			$relations = ( is_array($relations) ) ? $relations : explode(',', strval($relations));
+			foreach ($relations as $prop)
+			{
+				if( ! in_array($prop, $this->relations) )
+				{
+					$this->relations[] = trim($prop);
+				}
+			}
+		}
+
+		if($this instanceof Collection)
+		{
+			foreach ($this->data as $model)
+			{
+				$model->addRelations($this->relations);
+			}
+		}
+	}
+
+	protected function clearQueue()
+	{
+		self::$loadQueue = [];
+	}
+
+	public function queueUnresolvedObjects($data, $relations)
+	{
+		if( is_object($data) )
+		{
+
+			if( $data instanceof Model )
+			{
+				$data = $data->getData();
+			}
+			if( ! $this->resolved($data) )
+			{
+				$this->addToQueue($data, $relations);
+				return;
+			}
+
+			$data = get_object_vars($data);
+
+		}
+
+		if( is_array($data) )
+		{
+			foreach ($data as $key => $value)
+			{
+				if(is_int($key))
+				{
+					$this->queueUnresolvedObjects($value, $relations);
+				}
+				if($this->hasRelation($key, $relations))
+				{
+					$nestedRelations = $this->getNestedRelations($key, $relations);
+					$this->queueUnresolvedObjects($value, $nestedRelations);
+				}
+				
+			}
+		}
+	}
+
+	/**
+	 * Check if object is resolved
+	 * @return object $obj
+	 */
+	protected function resolved($obj)
+	{
+		if( ! is_object($obj) )
+		{
+			return true;
+		}
+
+		$data = get_object_vars($obj);
+		if( count($data) == 2
+			&& array_key_exists('id', $data)
+			&& array_key_exists('type', $data)
+		)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	protected function addToQueue($object, $relations)
+	{
+		if( ! array_key_exists($object->type, self::$loadQueue) )
+		{
+			self::$loadQueue[$object->type] = [];
+		}
+		$relationsKey = base64_encode(json_encode($relations));
+		if( ! array_key_exists($relationsKey, self::$loadQueue[$object->type]) )
+		{
+			self::$loadQueue[$object->type][$relationsKey] = [ 'type' => $object->type, 'ids' => [], 'relations' => $relations ];
+		}
+		self::$loadQueue[$object->type][$relationsKey]['ids'][] = $object->id;
+
+	}
+
+	/**
+	 * Check if relation exists
+	 * 
+	 * @param  string	$key
+	 * @param  array	$relations
+	 * 
+	 * @return boolean
+	 */
+	protected function hasRelation($key, $relations)
+	{
+		if(is_numeric($relations)) {
+			if($relations > 0) {
+				return true;
+			}
+			return false;
+		}
+
+		foreach ($relations as $prop)
+		{
+			if($prop === $key || 0 === strpos($prop, $key.'.'))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get nested relations for field
+	 * 
+	 * @param  string	$prop
+	 * @param  array	$relations
+	 * 
+	 * @return boolean
+	 */
+	protected function getNestedRelations($key, $relations)
+	{
+		if(is_numeric($relations))
+		{
+			if($key == 'fields')
+			{
+				return $relations;
+			}
+			if($relations - 1 > 0)
+			{
+				return $relations - 1;
+			}
+			return [];
+		}
+
+		$nestedRelations = [];
+		foreach ($relations as $prop)
+		{
+			if(0 === strpos($prop, $key.'.'))
+			{
+				$newRelation = substr($prop, strlen($key) + 1);
+				if( strlen($newRelation) !== 0)
+				{
+					$nestedRelations[] = $newRelation;
+				}
+			}
+		}
+		$nestedRelations = array_unique($nestedRelations);
+		return $nestedRelations;
+	}
+
+	/**
 	 * Load objects from queue
 	 * 
 	 * @return void
@@ -210,6 +393,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	protected function loadQueue()
 	{
 		$loadQueue = self::$loadQueue;
+
 		foreach ($loadQueue as $type => $queries)
 		{
 			foreach ($queries as $query)
@@ -309,138 +493,6 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		}
 
 		return $includes;
-	}
-
-	/**
-	 * Add relation properties
-	 * 
-	 * @param array | string $relations
-	 * 
-	 * @return void
-	 */
-	public function addRelations($relations)
-	{
-		$relations = ( is_array($relations) ) ? $relations : explode(',', strval($relations));
-		foreach ($relations as $prop)
-		{
-			if( ! in_array($prop, $this->relations) )
-			{
-				$this->relations[] = trim($prop);
-			}
-		}
-
-		if($this instanceof Collection)
-		{
-			foreach ($this->data as $model)
-			{
-				$model->addRelations($this->relations);
-			}
-		}
-	}
-
-	protected function addToQueue($object, $relations)
-	{
-		if( ! array_key_exists($object->type, self::$loadQueue) )
-		{
-			self::$loadQueue[$object->type] = [];
-		}
-		$relationsKey = base64_encode(json_encode($relations));
-		if( ! array_key_exists($relationsKey, self::$loadQueue[$object->type]) )
-		{
-			self::$loadQueue[$object->type][$relationsKey] = [ 'type' => $object->type, 'ids' => [], 'relations' => $relations ];
-		}
-		self::$loadQueue[$object->type][$relationsKey]['ids'][] = $object->id;
-
-	}
-
-	protected function clearQueue()
-	{
-		self::$loadQueue = [];
-	}
-
-	public function queueUnresolvedObjects($data, $relations)
-	{
-		if( is_object($data) )
-		{
-
-			if( $data instanceof Model )
-			{
-				$data = $data->getData();
-			}
-			if( ! $this->resolved($data) )
-			{
-				$this->addToQueue($data, $relations);
-				return;
-			}
-
-			$data = get_object_vars($data);
-
-		}
-
-		if( is_array($data) )
-		{
-			foreach ($data as $key => $value)
-			{
-				if($this->hasRelation($key, $relations))
-				{
-					$nestedRelations = $this->getNestedRelations($key, $relations);
-					$this->queueUnresolvedObjects($value, $nestedRelations);
-				}
-				if(is_int($key))
-				{
-					$this->queueUnresolvedObjects($value, $relations);
-				}
-			}
-		}
-
-
-	}
-
-	/**
-	 * Check if relation exists
-	 * 
-	 * @param  string	$key
-	 * @param  array	$relations
-	 * 
-	 * @return boolean
-	 */
-	protected function hasRelation($key, $relations)
-	{
-		foreach ($relations as $prop)
-		{
-			if($prop === $key || 0 === strpos($prop, $key.'.'))
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Get nested relations for field
-	 * 
-	 * @param  string	$prop
-	 * @param  array	$relations
-	 * 
-	 * @return boolean
-	 */
-	protected function getNestedRelations($key, $relations)
-	{
-		$nestedRelations = [];
-		foreach ($relations as $prop)
-		{
-			if(0 === strpos($prop, $key.'.'))
-			{
-				$newRelation = substr($prop, strlen($key) + 1);
-				if( strlen($newRelation) !== 0)
-				{
-					$nestedRelations[] = $newRelation;
-				}
-			}
-		}
-		$nestedRelations = array_unique($nestedRelations);
-		return $nestedRelations;
 	}
 
 	// ArrayAccess functions
@@ -647,8 +699,6 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 
 			foreach ($data as $key => &$value)
 			{
-				// var_dump($data);
-				// echo "key: " . $key . ' -> ' . $value;
 				$this->transformAttribute($data, $key, $value, $nestedInclude, $this->included + $extraIncludes, $callback);
 			}
 			
@@ -720,29 +770,6 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		
 		$array[$key] = $value;
 
-	}
-
-	/**
-	 * Check if object is resolved
-	 * @return object $obj
-	 */
-	protected function resolved($obj)
-	{
-		if( ! is_object($obj) )
-		{
-			return true;
-		}
-
-		$data = get_object_vars($obj);
-		if( count($data) == 2
-			&& array_key_exists('id', $data)
-			&& array_key_exists('type', $data)
-		)
-		{
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
