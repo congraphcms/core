@@ -270,12 +270,11 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 				{
 					$this->queueUnresolvedObjects($value, $relations);
 				}
-				if($this->hasRelation($key, $relations))
+				if($this->hasRelation($key, $value, $relations))
 				{
 					$nestedRelations = $this->getNestedRelations($key, $relations);
 					$this->queueUnresolvedObjects($value, $nestedRelations);
 				}
-				
 			}
 		}
 	}
@@ -303,6 +302,32 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		return true;
 	}
 
+	/**
+	 * Check if object is resolved
+	 * @return object $obj
+	 */
+	protected function isUnresolvedAsset($obj)
+	{
+		if( ! is_object($obj) )
+		{
+			return false;
+		}
+
+		$data = get_object_vars($obj);
+		if( count($data) == 2
+			&& array_key_exists('id', $data)
+			&& array_key_exists('type', $data)
+			&& $data['type'] == 'file'
+		)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	
+
 	protected function addToQueue($object, $relations)
 	{
 		if( ! array_key_exists($object->type, self::$loadQueue) )
@@ -318,15 +343,18 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 
 	}
 
+	protected static $counter_deep = 0;
+
 	/**
 	 * Check if relation exists
 	 * 
 	 * @param  string	$key
+	 * @param  mixed 	$value
 	 * @param  array	$relations
 	 * 
 	 * @return boolean
 	 */
-	protected function hasRelation($key, $relations)
+	protected function hasRelation($key, $value, $relations)
 	{
 		if(is_numeric($relations)) {
 			if($relations > 0) {
@@ -337,6 +365,24 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 
 		foreach ($relations as $prop)
 		{
+			if($prop == 'assets')
+			{
+				if( $key === 'fields' || (! $this->resolved($value) && is_object($value) && property_exists($value, 'type') && $value->type == 'file'))
+				{
+					return true;
+				}
+				if(is_array($value) && ! empty($value) && self::$counter_deep++ < 5){
+					$isAsset = true;
+					foreach ($value as $subValue)
+					{
+						if(!$this->isUnresolvedAsset($subValue)) {
+							$isAsset = false;
+							break;
+						}
+					}
+					if($isAsset) return true;
+				}
+			}
 			if($prop === $key || 0 === strpos($prop, $key.'.'))
 			{
 				return true;
@@ -372,6 +418,10 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 		$nestedRelations = [];
 		foreach ($relations as $prop)
 		{
+			if($prop === 'assets') {
+				$nestedRelations[] = $prop;
+				continue;
+			}
 			if(0 === strpos($prop, $key.'.'))
 			{
 				$newRelation = substr($prop, strlen($key) + 1);
