@@ -343,8 +343,6 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 
 	}
 
-	protected static $counter_deep = 0;
-
 	/**
 	 * Check if relation exists
 	 * 
@@ -371,7 +369,8 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 				{
 					return true;
 				}
-				if(is_array($value) && ! empty($value) && self::$counter_deep++ < 5){
+				if(is_array($value) && ! empty($value))
+				{
 					$isAsset = true;
 					foreach ($value as $subValue)
 					{
