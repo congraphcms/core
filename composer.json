@@ -10,11 +10,11 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "illuminate/validation": "5.*",
-        "illuminate/events": "5.*",
-        "illuminate/routing": "5.*",
-        "illuminate/contracts": "5.*",
-        "illuminate/support": "5.*",
+        "illuminate/validation": "5.1.*",
+        "illuminate/events": "5.1.*",
+        "illuminate/routing": "5.1.*",
+        "illuminate/contracts": "5.1.*",
+        "illuminate/support": "5.1.*",
         "cookbook/contracts": "dev-master"
     },
     "repositories": [
