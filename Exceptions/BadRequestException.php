@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/core package.
+ * This file is part of the congraph/core package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,16 +8,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Exceptions;
+namespace Congraph\Core\Exceptions;
 
 /**
  * BadRequestException class
  * 
- * Cookbook basic bad request exception
+ * Congraph basic bad request exception
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/core
+ * @package 	congraph/core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */

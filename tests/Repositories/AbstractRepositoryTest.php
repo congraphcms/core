@@ -9,7 +9,7 @@ class AbstractRepositoryTest extends PHPUnit_Framework_TestCase
 		$this->db = $this->mockConnection();
 
 		// create stub for Abstract Repository
-		$this->stub = $this	->getMockBuilder('Cookbook\Core\Repositories\AbstractRepository')
+		$this->stub = $this	->getMockBuilder('Congraph\Core\Repositories\AbstractRepository')
 							->setConstructorArgs(array($this->db))
 							->getMockForAbstractClass();
 

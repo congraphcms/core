@@ -6,7 +6,7 @@ class ErrorManagerTraitTest extends PHPUnit_Framework_TestCase
 	public function testSetEmptyErrors()
 	{
 		// create mock for trait
-		$mock = $this->getMockForTrait('Cookbook\Core\Traits\ErrorManagerTrait');
+		$mock = $this->getMockForTrait('Congraph\Core\Traits\ErrorManagerTrait');
 
 		// set errors message bag
 		$mock->setErrors();
@@ -25,7 +25,7 @@ class ErrorManagerTraitTest extends PHPUnit_Framework_TestCase
 	public function testSetErrorsWithMessages()
 	{
 		// create mock for trait
-		$mock = $this->getMockForTrait('Cookbook\Core\Traits\ErrorManagerTrait');
+		$mock = $this->getMockForTrait('Congraph\Core\Traits\ErrorManagerTrait');
 
 		// create errors
 		$messages = array(
@@ -51,7 +51,7 @@ class ErrorManagerTraitTest extends PHPUnit_Framework_TestCase
 	public function testEmptyErrors()
 	{
 		// create mock for trait
-		$mock = $this->getMockForTrait('Cookbook\Core\Traits\ErrorManagerTrait');
+		$mock = $this->getMockForTrait('Congraph\Core\Traits\ErrorManagerTrait');
 
 		// create errors
 		$messages = array(
@@ -80,7 +80,7 @@ class ErrorManagerTraitTest extends PHPUnit_Framework_TestCase
 	public function testAddingErrorMessages()
 	{
 		// create mock for trait
-		$mock = $this->getMockForTrait('Cookbook\Core\Traits\ErrorManagerTrait');
+		$mock = $this->getMockForTrait('Congraph\Core\Traits\ErrorManagerTrait');
 
 		// create different errors
 		$messages = array(

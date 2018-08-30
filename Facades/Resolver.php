@@ -1,11 +1,11 @@
 <?php
 
-namespace Cookbook\Core\Facades;
+namespace Congraph\Core\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \Cookbook\Contracts\Core\ObjectResolverContract
+ * @see \Congraph\Contracts\Core\ObjectResolverContract
  */
 class Resolver extends Facade
 {
@@ -16,6 +16,6 @@ class Resolver extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'Cookbook\Contracts\Core\ObjectResolverContract';
+        return 'Congraph\Contracts\Core\ObjectResolverContract';
     }
 }

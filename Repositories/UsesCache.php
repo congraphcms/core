@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the cookbook/core package.
+ * This file is part of the congraph/core package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,14 +8,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Repositories;
+namespace Congraph\Core\Repositories;
 
 /**
  * Interface for repositories that use cache
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/core
+ * @package 	congraph/core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */

@@ -1,5 +1,5 @@
 {
-    "name": "cookbook/core",
+    "name": "congraph/core",
     "description": "",
     "license": "MIT",
     "authors": [
@@ -15,21 +15,15 @@
         "illuminate/routing": "5.1.*",
         "illuminate/contracts": "5.1.*",
         "illuminate/support": "5.1.*",
-        "cookbook/contracts": "dev-master"
+        "congraph/contracts": "self.version"
     },
-    "repositories": [
-        {
-            "type": "git",
-            "url":  "git@bitbucket.org:cookbookcms/contracts.git"
-        }
-    ],
     "require-dev": {
         "phpunit/phpunit": "4.5.*",
         "orchestra/testbench": "3.1.*"
     },
     "autoload": {
         "psr-4": {
-            "Cookbook\\Core\\": ""
+            "Congraph\\Core\\": ""
         }
     },
     "minimum-stability": "dev"

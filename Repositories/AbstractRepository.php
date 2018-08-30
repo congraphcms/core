@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the Cookbook package.
+ * This file is part of the Congraph package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,10 +8,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Repositories;
+namespace Congraph\Core\Repositories;
 
 use Illuminate\Database\Connection;
-use Cookbook\Contracts\Core\RepositoryContract;
+use Congraph\Contracts\Core\RepositoryContract;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -22,14 +22,14 @@ use Illuminate\Support\Facades\Cache;
  * Allowing extra logic to be bound to any number of repository (domain) methods.
  * This logic should be implemented inside of proxy method
  *
- * @uses   		Cookbook\Contracts\Core\RepositoryContract
- * @uses   		Cookbook\Core\Traits\ValidatorTrait
+ * @uses   		Congraph\Contracts\Core\RepositoryContract
+ * @uses   		Congraph\Core\Traits\ValidatorTrait
  * @uses   		Illuminate\Database\Connection
  * @uses   		Illuminate\Contracts\Validation\Factory
  *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	Cookbook/Core
+ * @package 	Congraph/Core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  *

@@ -6,7 +6,7 @@ class ValidatorTraitTest extends PHPUnit_Framework_TestCase
 	protected function setUp()
 	{
 		// create mock for trait
-		$this->validatorTraitMock = $this->getMockForTrait('Cookbook\Core\Traits\ValidatorTrait');
+		$this->validatorTraitMock = $this->getMockForTrait('Congraph\Core\Traits\ValidatorTrait');
 
 		// set errors message bag in validator trait
 		$this->validatorTraitMock->setErrors();

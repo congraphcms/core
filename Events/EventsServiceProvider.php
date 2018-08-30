@@ -1,6 +1,6 @@
 <?php
 
-namespace Cookbook\Core\Events;
+namespace Congraph\Core\Events;
 
 use Illuminate\Support\ServiceProvider;
 

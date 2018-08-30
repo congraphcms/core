@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/core package.
+ * This file is part of the congraph/core package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,20 +8,20 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Exceptions;
+namespace Congraph\Core\Exceptions;
 
 use Exception as PHPException;
-use Cookbook\Core\Traits\ErrorManagerTrait;
-use Cookbook\Contracts\Core\ErrorManagementContract;
+use Congraph\Core\Traits\ErrorManagerTrait;
+use Congraph\Contracts\Core\ErrorManagementContract;
 
 /**
  * Exception class
  * 
- * Cookbook base exception, implements ErrorManagementContract
+ * Congraph base exception, implements ErrorManagementContract
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/core
+ * @package 	congraph/core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */

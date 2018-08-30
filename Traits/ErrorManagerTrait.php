@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the Cookbook package.
+ * This file is part of the Congraph package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Traits;
+namespace Congraph\Core\Traits;
 
 use Illuminate\Contracts\Support\MessageProvider;
 use Illuminate\Support\MessageBag;
@@ -23,7 +23,7 @@ use Illuminate\Support\MessageBag;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	Cookbook/Core
+ * @package 	Congraph/Core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */

@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the Cookbook package.
+ * This file is part of the Congraph package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,13 +8,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Traits;
+namespace Congraph\Core\Traits;
 
 use Illuminate\Contracts\Validation\Factory as ValidatorFactoryContract;
-use Cookbook\Contracts\Eav\FieldValidatorFactoryContract;
-use Cookbook\Core\Exceptions\ValidationException;
-use Cookbook\Core\Exceptions\NotFoundException;
-use Cookbook\Core\Bus\Command;
+use Congraph\Contracts\Eav\FieldValidatorFactoryContract;
+use Congraph\Core\Exceptions\ValidationException;
+use Congraph\Core\Exceptions\NotFoundException;
+use Congraph\Core\Bus\Command;
 use Illuminate\Support\Facades\Validator as ValidatorFacade;
 use Illuminate\Validation\Validator as LaravelValidator;
 
@@ -26,7 +26,7 @@ use Illuminate\Validation\Validator as LaravelValidator;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	Cookbook/Core
+ * @package 	Congraph/Core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -36,7 +36,7 @@ trait ValidatorTrait
 	/**
 	 * validation exception that will be thrown if validation fails
 	 *
-	 * @var Cookbook\Core\Exceptions\ValidationException
+	 * @var Congraph\Core\Exceptions\ValidationException
 	 */
 	protected $exception = null;
 
@@ -222,7 +222,7 @@ trait ValidatorTrait
 	/**
 	 * Validate command
 	 * 
-	 * @param Cookbook\Core\Bus\RepositoryCommand $command
+	 * @param Congraph\Core\Bus\RepositoryCommand $command
 	 * 
 	 * @return void
 	 */
