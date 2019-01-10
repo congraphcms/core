@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/core package.
+ * This file is part of the congraph/core package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -24,7 +24,7 @@ if (!function_exists('is_assoc'))
 
 if (!function_exists('cbMergeCollections')) {
 	/**
-	 * Merge collections of cookbook objects
+	 * Merge collections of congraph objects
 	 *
 	 * @param  array  $array
 	 * @return boolean

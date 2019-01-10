@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the Cookbook package.
+ * This file is part of the Congraph package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Repositories;
+namespace Congraph\Core\Repositories;
 
 use stdClass;
 use Exception;
@@ -21,7 +21,7 @@ use ReflectionClass;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/core
+ * @package 	congraph/core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -91,7 +91,7 @@ class Collection extends DataTransferObject implements Iterator, Countable
 	/**
 	 * Set default model class
 	 * 
-	 * @param Cookbook\Core\Repositories\Model|string $model
+	 * @param Congraph\Core\Repositories\Model|string $model
 	 * 
 	 * @throws \InvalidArgumentException
 	 */

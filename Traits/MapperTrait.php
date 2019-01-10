@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the cookbook/core package.
+ * This file is part of the congraph/core package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,11 +8,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Traits;
+namespace Congraph\Core\Traits;
 
 use Exception;
 use Closure;
-use Cookbook\Core\Bus\Command;
+use Congraph\Core\Bus\Command;
 use Illuminate\Support\Facades\Bus;
 
 /**
@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Bus;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/core
+ * @package 	congraph/core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */

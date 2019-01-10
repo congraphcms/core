@@ -5,7 +5,7 @@ class TrunkTest extends PHPUnit_Framework_TestCase
 
 	public function testPut()
 	{
-		// $trunk = new Cookbook\Core\Repositories\TrunkCache();
+		// $trunk = new Congraph\Core\Repositories\TrunkCache();
 
 		// $post = new stdClass();
 		// $post->id = 1;
@@ -13,7 +13,7 @@ class TrunkTest extends PHPUnit_Framework_TestCase
 		// $post->title = 'Post Title';
 		// $post->body = 'Post body...';
 
-		// $post = new Cookbook\Core\Repositories\Model($post);
+		// $post = new Congraph\Core\Repositories\Model($post);
 
 		// $post2 = new stdClass();
 		// $post2->id = 2;
@@ -26,7 +26,7 @@ class TrunkTest extends PHPUnit_Framework_TestCase
 
 		// $collection = [$post2];
 
-		// $collection = new Cookbook\Core\Repositories\Collection($collection);
+		// $collection = new Congraph\Core\Repositories\Collection($collection);
 
 		// $collection->load('parent');
 

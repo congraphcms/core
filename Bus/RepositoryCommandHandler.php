@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/core package.
+ * This file is part of the congraph/core package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,20 +8,20 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Bus;
+namespace Congraph\Core\Bus;
 
-use Cookbook\Contracts\Core\RepositoryContract;
+use Congraph\Contracts\Core\RepositoryContract;
 
 
 /**
  * Base Repository Command Handler class
  * Handling repository commands
  * 
- * @uses  		Cookbook\Contracts\Core\RepositoryContract
+ * @uses  		Congraph\Contracts\Core\RepositoryContract
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/eav
+ * @package 	congraph/eav
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -30,14 +30,14 @@ abstract class RepositoryCommandHandler
 	/**
 	 * Repository for DB operations
 	 * 
-	 * @var Cookbook\Contracts\Core\RepositoryContract
+	 * @var Congraph\Contracts\Core\RepositoryContract
 	 */
 	protected $repository;
 
 	/**
 	 * Create new RepositoryCommandHandler
 	 * 
-	 * @param Cookbook\Contracts\Core\RepositoryContract $repository
+	 * @param Congraph\Contracts\Core\RepositoryContract $repository
 	 * 
 	 * @return void
 	 */
@@ -51,7 +51,7 @@ abstract class RepositoryCommandHandler
 	/**
 	 * Handle RepositoryCommand
 	 * 
-	 * @param Cookbook\Core\Bus\RepositoryCommand $command
+	 * @param Congraph\Core\Bus\RepositoryCommand $command
 	 * 
 	 * @return void
 	 */

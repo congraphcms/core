@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/core package.
+ * This file is part of the congraph/core package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Helpers;
+namespace Congraph\Core\Helpers;
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Storage;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/core
+ * @package 	congraph/core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -32,8 +32,8 @@ class ImageHelper
 	public $imagePackages;
 
 	public function __construct(){
-		$this->imageVersions = Config::get('cookbook::cookbook.image_versions');
-		$this->imagePackages = Config::get('cookbook::cookbook.image_packages');
+		$this->imageVersions = Config::get('congraph::congraph.image_versions');
+		$this->imagePackages = Config::get('congraph::congraph.image_packages');
 	}
 
 	public function getImageVersionsPaths($imagepath){
@@ -139,7 +139,7 @@ class ImageHelper
 			return false;
 		}
 		if(empty($this->imageVersions)){
-			$this->imageVersions = Config::get('cookbook::cookbook.image_versions');
+			$this->imageVersions = Config::get('congraph::congraph.image_versions');
 		}
 		
 

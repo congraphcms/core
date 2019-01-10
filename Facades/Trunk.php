@@ -1,11 +1,11 @@
 <?php
 
-namespace Cookbook\Core\Facades;
+namespace Congraph\Core\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \Cookbook\Contracts\Core\TrunkContract
+ * @see \Congraph\Contracts\Core\TrunkContract
  */
 class Trunk extends Facade
 {
@@ -16,6 +16,6 @@ class Trunk extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'Cookbook\Contracts\Core\TrunkContract';
+        return 'Congraph\Contracts\Core\TrunkContract';
     }
 }

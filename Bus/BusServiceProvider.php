@@ -1,6 +1,6 @@
 <?php
 
-namespace Cookbook\Core\Bus;
+namespace Congraph\Core\Bus;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -15,18 +15,18 @@ class BusServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('Cookbook\Core\Bus\CommandDispatcher', function ($app) {
+        $this->app->singleton('Congraph\Core\Bus\CommandDispatcher', function ($app) {
             return new CommandDispatcher($app, function () use ($app) {
                 return $app['Illuminate\Contracts\Queue\Queue'];
             });
         });
 
         $this->app->alias(
-            'Cookbook\Core\Bus\CommandDispatcher', 'Illuminate\Contracts\Bus\Dispatcher'
+            'Congraph\Core\Bus\CommandDispatcher', 'Illuminate\Contracts\Bus\Dispatcher'
         );
 
         $this->app->alias(
-            'Cookbook\Core\Bus\CommandDispatcher', 'Illuminate\Contracts\Bus\QueueingDispatcher'
+            'Congraph\Core\Bus\CommandDispatcher', 'Illuminate\Contracts\Bus\QueueingDispatcher'
         );
     }
 }

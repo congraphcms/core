@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/core package.
+ * This file is part of the congraph/core package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core;
+namespace Congraph\Core;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -19,7 +19,7 @@ use Illuminate\Support\ServiceProvider;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/core
+ * @package 	congraph/core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
@@ -55,15 +55,15 @@ class CoreServiceProvider extends ServiceProvider
 	{
 		// Core Bus
 		// -----------------------------------------------------------------------------
-		$this->app->register('Cookbook\Core\Bus\BusServiceProvider');
+		$this->app->register('Congraph\Core\Bus\BusServiceProvider');
 
 		// Core Event
 		// -----------------------------------------------------------------------------
-		$this->app->register('Cookbook\Core\Events\EventsServiceProvider');
+		$this->app->register('Congraph\Core\Events\EventsServiceProvider');
 
 		// Repositories
 		// -----------------------------------------------------------------------------
-		$this->app->register('Cookbook\Core\Repositories\RepositoriesServiceProvider');
+		$this->app->register('Congraph\Core\Repositories\RepositoriesServiceProvider');
 	}
 
 }

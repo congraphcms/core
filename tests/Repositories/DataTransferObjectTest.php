@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Cache;
-use Cookbook\Core\Facades\Trunk;
+use Congraph\Core\Facades\Trunk;
 use Illuminate\Support\Debug\Dumper;
 
 
@@ -45,7 +45,7 @@ class DataTransferObjectTest extends Orchestra\Testbench\TestCase
 			'driver'   	=> 'mysql',
 			'host'      => '127.0.0.1',
 			'port'		=> '3306',
-			'database'	=> 'cookbook_testbench',
+			'database'	=> 'congraph_testbench',
 			'username'  => 'homestead',
 			'password'  => 'secret',
 			'charset'   => 'utf8',
@@ -63,7 +63,7 @@ class DataTransferObjectTest extends Orchestra\Testbench\TestCase
 		// $config = require(realpath(__DIR__.'/../../config/eav.php'));
 
 		// $app['config']->set(
-		// 	'Cookbook::eav', $config
+		// 	'Congraph::eav', $config
 		// );
 
 		// var_dump('CONFIG SETTED');
@@ -72,7 +72,7 @@ class DataTransferObjectTest extends Orchestra\Testbench\TestCase
 	protected function getPackageProviders($app)
 	{
 		return [
-			'Cookbook\Core\CoreServiceProvider'
+			'Congraph\Core\CoreServiceProvider'
 		];
 	}
 
@@ -121,7 +121,7 @@ class DataTransferObjectTest extends Orchestra\Testbench\TestCase
 
 		// $include = 'categories, fields.author.data, fields.author.test.new_data, parent';
 
-		$collection = new Cookbook\Core\Repositories\Collection($data);
+		$collection = new Congraph\Core\Repositories\Collection($data);
 		$result = $collection->toArray();
 
 		$this->d->dump($result);

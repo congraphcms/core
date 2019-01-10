@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the cookbook/core package.
+ * This file is part of the congraph/core package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,20 +8,20 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Helpers;
+namespace Congraph\Core\Helpers;
 
-use Cookbook\Contracts\Core\StringHelperContract;
+use Congraph\Contracts\Core\StringHelperContract;
 
 /**
  * StringHelper class
  * 
  * Helping with string operations: trimming, regex, slugs, etc.
  * 
- * @uses 		Cookbook\Contracts\Core\StringHelperContract
+ * @uses 		Congraph\Contracts\Core\StringHelperContract
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	cookbook/core
+ * @package 	congraph/core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */

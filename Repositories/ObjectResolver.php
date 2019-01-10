@@ -1,6 +1,6 @@
 <?php 
 /*
- * This file is part of the Cookbook package.
+ * This file is part of the Congraph package.
  *
  * (c) Nikola Plavšić <nikolaplavsic@gmail.com>
  *
@@ -8,10 +8,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Cookbook\Core\Repositories;
+namespace Congraph\Core\Repositories;
 
-use Cookbook\Contracts\Core\ObjectResolverContract;
-use Cookbook\Core\Traits\MapperTrait;
+use Congraph\Contracts\Core\ObjectResolverContract;
+use Congraph\Core\Traits\MapperTrait;
 use Illuminate\Contracts\Container\Container;
 
 /**
@@ -21,7 +21,7 @@ use Illuminate\Contracts\Container\Container;
  * 
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
- * @package 	Cookbook/Core
+ * @package 	Congraph/Core
  * @since 		0.1.0-alpha
  * @version  	0.1.0-alpha
  */
