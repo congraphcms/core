@@ -151,9 +151,14 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	{
 		if ($command instanceof SelfValidating) {
             return $this->container->call([$command, 'validate']);
-        }
+		}
+		
+		$validatorClass = $this->getValidatorClass($command);
+		if(!$validatorClass) {
+			return;
+		}
         
-		$validator = $this->container->make($this->getValidatorClass($command));
+		$validator = $this->container->make($validatorClass);
 		$method = $this->getValidatorMethod($command);
 
 		call_user_func([$validator, $method], $command);
