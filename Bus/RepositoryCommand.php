@@ -49,4 +49,11 @@ abstract class RepositoryCommand extends Command
 		$this->params = $params;
 		$this->id = $id;
 	}
+
+	/**
+	 * Handle command (Self handling)
+	 * 
+	 * @return mixed
+	 */
+	public abstract function handle();
 }
