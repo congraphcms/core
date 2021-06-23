@@ -10,6 +10,8 @@
 
 namespace Congraph\Core\Bus;
 
+use Congraph\Contracts\Core\RepositoryContract;
+
 /**
  * Base Repository Command class
  * 
