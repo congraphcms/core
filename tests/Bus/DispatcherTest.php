@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Debug\Dumper;
+use Symfony\Component\VarDumper\VarDumper as Dumper;
 
 class DispatcherTest extends \Orchestra\Testbench\TestCase
 {
