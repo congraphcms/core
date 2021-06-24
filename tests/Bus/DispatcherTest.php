@@ -60,7 +60,6 @@ class DispatcherTest extends Orchestra\Testbench\TestCase
 		fwrite(STDOUT, __METHOD__ . "\n");
 
 		$bus = $this->app->make('Congraph\Core\Bus\CommandDispatcher');
-		$this->d->dump(get_class($bus));
 		$this->assertEquals('Congraph\Core\Bus\CommandDispatcher', get_class($bus));
 	}
 

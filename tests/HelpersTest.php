@@ -17,8 +17,6 @@ class HelpersTest extends PHPUnit_Framework_TestCase
 			'include' => 'attributes.sets.options,attributes.relations,sets'
 		];
 		$params = cbParseUrlParams($params);
-
-		var_dump($params);
 	}
 
 }

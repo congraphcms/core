@@ -31,8 +31,6 @@ class TrunkTest extends PHPUnit_Framework_TestCase
 		// $collection->load('parent');
 
 		// $result = $trunk->get([], 'post');
-
-		// var_dump($result->toArray(true, false));
 	}
 }
 ?>

@@ -65,8 +65,6 @@ class DataTransferObjectTest extends Orchestra\Testbench\TestCase
 		// $app['config']->set(
 		// 	'Congraph::eav', $config
 		// );
-
-		// var_dump('CONFIG SETTED');
 	}
 
 	protected function getPackageProviders($app)

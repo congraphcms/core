@@ -21,7 +21,6 @@ class BusServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        var_dump("REGISTER");
         $this->app->singleton('Congraph\Core\Bus\CommandDispatcher', function ($app) {
             return new CommandDispatcher($app, function () use ($app) {
                 return $app['Illuminate\Contracts\Queue\Queue'];
