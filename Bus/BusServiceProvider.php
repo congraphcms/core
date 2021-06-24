@@ -27,23 +27,23 @@ class BusServiceProvider extends ServiceProvider
             });
         });
 
-        $this->app->bind(
-            'Illuminate\Contracts\Bus\Dispatcher',
-            'Congraph\Core\Bus\CommandDispatcher'
-        );
-
-        $this->app->bind(
-            'Illuminate\Contracts\Bus\QueueingDispatcher',
-            'Congraph\Core\Bus\CommandDispatcher'
-        );
-
-        // $this->app->alias(
-        //     'Congraph\Core\Bus\CommandDispatcher', 'Illuminate\Contracts\Bus\Dispatcher'
+        // $this->app->bind(
+        //     'Illuminate\Contracts\Bus\Dispatcher',
+        //     'Congraph\Core\Bus\CommandDispatcher'
         // );
 
-        // $this->app->alias(
-        //     'Congraph\Core\Bus\CommandDispatcher', 'Illuminate\Contracts\Bus\QueueingDispatcher'
+        // $this->app->bind(
+        //     'Illuminate\Contracts\Bus\QueueingDispatcher',
+        //     'Congraph\Core\Bus\CommandDispatcher'
         // );
+
+        $this->app->alias(
+            'Congraph\Core\Bus\CommandDispatcher', 'Illuminate\Contracts\Bus\Dispatcher'
+        );
+
+        $this->app->alias(
+            'Congraph\Core\Bus\CommandDispatcher', 'Illuminate\Contracts\Bus\QueueingDispatcher'
+        );
     }
 
     /**
