@@ -65,10 +65,9 @@ abstract class RepositoryCommand extends Command
 	 * 
 	 * @return void
 	 */
-	public function setParams(array $params, $id = null)
+	public function setParams(array $params)
 	{
 		$this->params = $params;
-		$this->id = $id;
 	}
 
 	/**
