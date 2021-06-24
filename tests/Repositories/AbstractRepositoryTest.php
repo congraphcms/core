@@ -1,6 +1,6 @@
 <?php
 
-class AbstractRepositoryTest extends PHPUnit_Framework_TestCase
+class AbstractRepositoryTest extends \PHPUnit\Framework\TestCase
 {
 
 	protected function setUp()

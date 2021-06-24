@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Debug\Dumper;
 
-class DispatcherTest extends Orchestra\Testbench\TestCase
+class DispatcherTest extends \Orchestra\Testbench\TestCase
 {
 
 	public function setUp()
@@ -48,11 +48,6 @@ class DispatcherTest extends Orchestra\Testbench\TestCase
 	protected function getPackageProviders($app)
 	{
 		return ['Congraph\Core\CoreServiceProvider'];
-	}
-
-	public function testTheTest()
-	{
-		fwrite(STDOUT, __METHOD__ . "\n");
 	}
 
 	public function testLoadingOfDispatcher()
