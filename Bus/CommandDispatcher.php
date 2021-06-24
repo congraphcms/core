@@ -83,7 +83,7 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	{
 		$eventName = 'cb.' . $beforeOrAfter . '.' . $name;
 
-		Event::fire($eventName, $args);
+		Event::dispatch($eventName, $args);
 	}
 
 	/**
