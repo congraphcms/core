@@ -3,8 +3,7 @@
 class AbstractRepositoryTest extends \PHPUnit\Framework\TestCase
 {
 
-	protected function setUp()
-	{
+	protected function setUp(): void {
 		// create mock for DB
 		$this->db = $this->mockConnection();
 
@@ -17,11 +16,12 @@ class AbstractRepositoryTest extends \PHPUnit\Framework\TestCase
 	}
 
 	/**
-	 * @expectedException BadMethodCallException
-	 * @expectedExceptionMessage Unkonown method abcdefg.
+	 * @test
 	 */
 	public function testCallToUnknownMethod()
 	{
+		$this->expectException(BadMethodCallException::class);
+		$this->expectExceptionMessage('Unkonown method abcdefg.');
 		$this->stub->abcdefg();
 	}
 

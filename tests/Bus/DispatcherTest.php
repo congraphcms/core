@@ -6,16 +6,14 @@ use Symfony\Component\VarDumper\VarDumper as Dumper;
 class DispatcherTest extends \Orchestra\Testbench\TestCase
 {
 
-	public function setUp()
-	{
+	public function setUp(): void {
 		parent::setUp();
 
 		// code here
 		$this->d = new Dumper();
 	}
 
-	public function tearDown()
-	{
+	public function tearDown(): void {
 		// code here
 
 		parent::tearDown();
