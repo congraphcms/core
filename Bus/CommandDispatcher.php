@@ -63,7 +63,7 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 		$this->validate($command);
 		
 		// dispatch the command
-		$result = parent::dispatch($command, $afterResolving);
+		$result = parent::dispatchNow($command, $afterResolving);
 		
 		// fire any registered events after command
 		$this->fireAfterCommandEvent($command, $result);
