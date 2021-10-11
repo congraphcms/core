@@ -169,51 +169,27 @@ class FileHelper
 		// get directory
 		$dir = self::getDirectory($path);
 
-        Log::debug('DIR -> ' . $dir);
-
 		// get filename
 		$filename = self::getFileName($path);
-        Log::debug('FILENAME -> ' . $filename);
 
 		// sanitize the file name before we begin processing
 		$filename = self::sanitizeFileName($filename);
-        Log::debug('SANITIZED FILENAME -> ' . $filename);
 
 		// separate the filename into a name and extension
 		$info = pathinfo($filename);
 		$ext = !empty($info['extension']) ? '.' . $info['extension'] : '';
 		$name = basename($filename, $ext);
-        Log::debug('FULL FILENAME -> ' . $name);
+        $ext = strtolower($ext);
+        $filename = $name . $ext;
 
 		// edge case: if file is named '.ext', treat as an empty name
 		if ( $name === $ext ) $name = '';
 
 		// Increment the file number until we have a unique file to save in $dir.
 
-		$number = 0;
-		// change '.ext' to lower case
-		if ( $ext && strtolower($ext) != $ext ) {
-			$ext2 = strtolower($ext);
-			$filename2 = preg_replace( '|' . preg_quote($ext) . '$|', $ext2, $filename );
-			// check for both lower and upper case extension or image sub-sizes may be overwritten
-			while ( Storage::has($dir . DIRECTORY_SEPARATOR . $filename) || Storage::has($dir . DIRECTORY_SEPARATOR . $filename2) ) {
-				$new_number = $number + 1;
-                if ($number == 0) {
-                    $filename = str_replace( "{$ext}", "{$new_number}{$ext}", $filename );
-                    $filename2 = str_replace( "$ext2", "$new_number$ext2", $filename2 );
-                } else {
-                    $filename = str_replace( "{$number}{$ext}", "{$new_number}{$ext}", $filename );
-                    $filename2 = str_replace( "$number$ext2", "$new_number$ext2", $filename2 );
-                }
-				$number = $new_number;
-			}
-			return self::normalizePath($dir . DIRECTORY_SEPARATOR . $filename2);
-		}
+		$number = 1;
 		while ( Storage::has( $dir . DIRECTORY_SEPARATOR . $filename ) ) {
-			if ( '' == "$number$ext" )
-				$filename = $filename . ++$number . $ext;
-			else
-				$filename = str_replace( "$number$ext", ++$number . $ext, $filename );
+            $filename = $name . $number++ . $ext;
 		}
 		return self::normalizePath($dir . DIRECTORY_SEPARATOR . $filename);
 	}
