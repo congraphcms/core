@@ -278,7 +278,7 @@ class AbstractRepositoryTest extends \PHPUnit\Framework\TestCase
 	{
 		return $this->getMockBuilder('Illuminate\Database\Connection')
 					->disableOriginalConstructor()
-					->setMethods(array('beginTransaction', 'commit', 'rollback'))
+					->onlyMethods(array('beginTransaction', 'commit', 'rollback'))
 					->getMock();
 	}
 }
