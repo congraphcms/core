@@ -13,12 +13,13 @@ namespace Congraph\Core\Helpers;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 /**
  * FileHelper class
- * 
+ *
  * Helping with file operations: trimming, regex, slugs, etc.
- * 
+ *
  * @author  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @copyright  	Nikola Plavšić <nikolaplavsic@gmail.com>
  * @package 	congraph/core
@@ -66,7 +67,7 @@ class FileHelper
 	 * Normalizes path slashes when mixed between path and url conversion
 	 *
 	 * It takes string with mixed or doubled slashes and converts them
-	 * to single slashes dependent on system beacose of use of DIRECTORY_SEPARATOR const, 
+	 * to single slashes dependent on system beacose of use of DIRECTORY_SEPARATOR const,
 	 * and optionally trims right slash.
 	 *
 	 * There are two parameters,
@@ -147,7 +148,7 @@ class FileHelper
 		);
 		foreach ( $quant as $unit => $mag ) {
 			if ( doubleval($bytes) >= $mag )
-				return  number_format ( ($bytes / $mag), $decimals ). ' ' . $unit;	
+				return  number_format ( ($bytes / $mag), $decimals ). ' ' . $unit;
 		}
 		return false;
 	}
@@ -160,10 +161,11 @@ class FileHelper
 	 * unique.
 	 *
 	 * @param string $path
-	 * 
+	 *
 	 * @return string
 	 */
 	public static function uniqueFilename($path) {
+        Log::debug($path);
 		// get directory
 		$dir = self::getDirectory($path);
 
@@ -177,31 +179,17 @@ class FileHelper
 		$info = pathinfo($filename);
 		$ext = !empty($info['extension']) ? '.' . $info['extension'] : '';
 		$name = basename($filename, $ext);
+        $ext = strtolower($ext);
+        $filename = $name . $ext;
 
 		// edge case: if file is named '.ext', treat as an empty name
 		if ( $name === $ext ) $name = '';
 
 		// Increment the file number until we have a unique file to save in $dir.
-		
-		$number = '';
-		// change '.ext' to lower case
-		if ( $ext && strtolower($ext) != $ext ) {
-			$ext2 = strtolower($ext);
-			$filename2 = preg_replace( '|' . preg_quote($ext) . '$|', $ext2, $filename );
-			// check for both lower and upper case extension or image sub-sizes may be overwritten
-			while ( Storage::has($dir . DIRECTORY_SEPARATOR . $filename) || Storage::has($dir . DIRECTORY_SEPARATOR . $filename2) ) {
-				$new_number = $number + 1;
-				$filename = str_replace( "$number$ext", "$new_number$ext", $filename );
-				$filename2 = str_replace( "$number$ext2", "$new_number$ext2", $filename2 );
-				$number = $new_number;
-			}
-			return $filename2;
-		}
+
+		$number = 1;
 		while ( Storage::has( $dir . DIRECTORY_SEPARATOR . $filename ) ) {
-			if ( '' == "$number$ext" )
-				$filename = $filename . ++$number . $ext;
-			else
-				$filename = str_replace( "$number$ext", ++$number . $ext, $filename );
+            $filename = $name . $number++ . $ext;
 		}
 		return self::normalizePath($dir . DIRECTORY_SEPARATOR . $filename);
 	}
@@ -226,7 +214,7 @@ class FileHelper
 		$filename = trim($filename, '.-_');
 
 		return $filename;
-		
+
 	}
 
 	/**
@@ -249,7 +237,7 @@ class FileHelper
 	 * Extracts directory from path
 	 *
 	 * @param string $path from wich filename will be extracted
-	 * 
+	 *
 	 * @return string
 	 */
 	public static function getDirectory($path)

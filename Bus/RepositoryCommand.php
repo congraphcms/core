@@ -10,6 +10,8 @@
 
 namespace Congraph\Core\Bus;
 
+use Congraph\Contracts\Core\RepositoryContract;
+
 /**
  * Base Repository Command class
  * 
@@ -37,16 +39,53 @@ abstract class RepositoryCommand extends Command
 	public $params;
 
 	/**
-	 * Create new RepositoryCommand
-	 *
-	 * @param array 					$params
-	 * @param mixed 					$id
+	 * Repository for DB operations
+	 * 
+	 * @var Congraph\Contracts\Core\RepositoryContract
+	 */
+	protected $repository;
+
+	/**
+	 * Create new RepositoryCommandHandler
+	 * 
+	 * @param Congraph\Contracts\Core\RepositoryContract $repository
 	 * 
 	 * @return void
 	 */
-	public function __construct(array $params, $id = null)
-	{		
+	public function __construct(RepositoryContract $repository)
+	{
+		// inject dependencies
+		$this->repository = $repository;
+	}
+
+	/**
+	 * Set command params
+	 *
+	 * @param array 					$params
+	 * 
+	 * @return void
+	 */
+	public function setParams(array $params)
+	{
 		$this->params = $params;
+	}
+
+	/**
+	 * Set command entity ID
+	 *
+	 * @param array 					$params
+	 * 
+	 * @return void
+	 */
+	public function setId($id)
+	{
 		$this->id = $id;
 	}
+
+	/**
+	 * Handle command (Self handling)
+	 * 
+	 * @return mixed
+	 */
+	public abstract function handle();
 }

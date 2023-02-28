@@ -14,6 +14,7 @@ use Closure;
 use Illuminate\Bus\Dispatcher;
 use Congraph\Contracts\Core\ValidationCommandDispatcherContract;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 
 /**
  * CommandDispatcher class
@@ -63,7 +64,7 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 		$this->validate($command);
 		
 		// dispatch the command
-		$result = parent::dispatch($command, $afterResolving);
+		$result = parent::dispatchNow($command, $afterResolving);
 		
 		// fire any registered events after command
 		$this->fireAfterCommandEvent($command, $result);
@@ -83,7 +84,7 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	{
 		$eventName = 'cb.' . $beforeOrAfter . '.' . $name;
 
-		Event::fire($eventName, $args);
+		Event::dispatch($eventName, $args);
 	}
 
 	/**
@@ -128,12 +129,12 @@ class CommandDispatcher extends Dispatcher implements ValidationCommandDispatche
 	protected function commandNameToEventName($command)
 	{
 		$commandName = class_basename($command);
-		if(ends_with($commandName, 'Command'))
+		if(Str::endsWith($commandName, 'Command'))
 		{
 			$commandName = substr($commandName, 0, strpos($commandName, 'Command'));
 		}
 
-		$commandName = snake_case($commandName);
+		$commandName = Str::snake($commandName);
 		$parts = explode('_', $commandName);
 		$eventName = implode('.', $parts);
 

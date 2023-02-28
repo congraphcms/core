@@ -1,6 +1,6 @@
 <?php
 
-class ErrorManagerTraitTest extends PHPUnit_Framework_TestCase
+class ErrorManagerTraitTest extends \PHPUnit\Framework\TestCase
 {
 
 	public function testSetEmptyErrors()
