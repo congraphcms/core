@@ -1,12 +1,16 @@
 <?php
 
+use Congraph\Core\Traits\ErrorManagerTrait;
+use Illuminate\Support\MessageBag;
+
 class ErrorManagerTraitTest extends \PHPUnit\Framework\TestCase
 {
 
 	public function testSetEmptyErrors()
 	{
-		// create mock for trait
-		$mock = $this->getMockForTrait('Congraph\Core\Traits\ErrorManagerTrait');
+		$mock = new class {
+			use ErrorManagerTrait;
+		};
 
 		// set errors message bag
 		$mock->setErrors();
@@ -15,7 +19,7 @@ class ErrorManagerTraitTest extends \PHPUnit\Framework\TestCase
 		$bag = $mock->getErrorBag();
 
 		// assert if bag is instance of MessageBag
-		$this->assertInstanceOf('Illuminate\Support\MessageBag', $bag);
+		$this->assertInstanceOf(MessageBag::class, $bag);
 
 		$hasErrors = $mock->hasErrors();
 		// assert if bag is empty
@@ -24,8 +28,9 @@ class ErrorManagerTraitTest extends \PHPUnit\Framework\TestCase
 
 	public function testSetErrorsWithMessages()
 	{
-		// create mock for trait
-		$mock = $this->getMockForTrait('Congraph\Core\Traits\ErrorManagerTrait');
+		$mock = new class {
+			use ErrorManagerTrait;
+		};
 
 		// create errors
 		$messages = array(
@@ -37,7 +42,7 @@ class ErrorManagerTraitTest extends \PHPUnit\Framework\TestCase
 
 		// assert if error bag is still instance of MessageBag
 		$bag = $mock->getErrorBag();
-		$this->assertInstanceOf('Illuminate\Support\MessageBag', $bag);
+		$this->assertInstanceOf(MessageBag::class, $bag);
 
 		// check errors that are returned
 		$errorMessages = $mock->getErrors();
@@ -50,8 +55,9 @@ class ErrorManagerTraitTest extends \PHPUnit\Framework\TestCase
 
 	public function testEmptyErrors()
 	{
-		// create mock for trait
-		$mock = $this->getMockForTrait('Congraph\Core\Traits\ErrorManagerTrait');
+		$mock = new class {
+			use ErrorManagerTrait;
+		};
 
 		// create errors
 		$messages = array(
@@ -79,8 +85,9 @@ class ErrorManagerTraitTest extends \PHPUnit\Framework\TestCase
 		
 	public function testAddingErrorMessages()
 	{
-		// create mock for trait
-		$mock = $this->getMockForTrait('Congraph\Core\Traits\ErrorManagerTrait');
+		$mock = new class {
+			use ErrorManagerTrait;
+		};
 
 		// create different errors
 		$messages = array(
@@ -94,7 +101,7 @@ class ErrorManagerTraitTest extends \PHPUnit\Framework\TestCase
 
 		// assert if error bag is still instance of MessageBag
 		$bag = $mock->getErrorBag();
-		$this->assertInstanceOf('Illuminate\Support\MessageBag', $bag);
+		$this->assertInstanceOf(MessageBag::class, $bag);
 
 		// check errors that are returned
 		$errorMessages = $mock->getErrors();
@@ -121,6 +128,4 @@ class ErrorManagerTraitTest extends \PHPUnit\Framework\TestCase
 		// assert errors are returned correctly
 		$this->assertEquals($messages, $errorMessages);
 	}
-
 }
-?>

@@ -72,7 +72,7 @@ class Exception extends PHPException implements ErrorManagementContract
 
 		if( ! empty($this->previous) && is_array($this->previous) )
 		{
-			foreach ($previous as $exception) {
+			foreach ($this->previous as $exception) {
 				if($exception instanceOf Exception)
 				{
 					$compiledErrors = array_merge_recursive($compiledErrors, $exception->compileErrors());

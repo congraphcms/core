@@ -42,6 +42,13 @@ class Collection extends DataTransferObject implements Iterator, Countable
 	protected $defaultModel = Model::class;
 
 	/**
+	 * Iterator position.
+	 *
+	 * @var int|string|null
+	 */
+	protected $position;
+
+	/**
 	 * Creates new Collection
 	 * 
 	 * @param stdClass|array $data
@@ -195,36 +202,36 @@ class Collection extends DataTransferObject implements Iterator, Countable
 
 	// Iterator functions
 	
-	function rewind()
+	function rewind(): void
 	{
 		reset($this->data);
 		$this->position = key($this->data);
 	}
 
-	function current()
+	function current(): mixed
 	{
 		return $this->data[$this->position];
 	}
 
-	function key()
+	function key(): mixed
 	{
 		return $this->position;
 	}
 
-	function next()
+	function next(): void
 	{
 		next($this->data);
 		$this->position = key($this->data);
 	}
 
-	function valid()
+	function valid(): bool
 	{
 		return isset($this->data[$this->position]);
 	}
 
 	// Countable functions
 	
-	function count()
+	function count(): int
 	{
 		return count($this->data);
 	}

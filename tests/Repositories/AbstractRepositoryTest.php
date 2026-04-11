@@ -1,23 +1,21 @@
 <?php
 
+require_once __DIR__ . '/../Fixtures/Repositories/RepositoryStub.php';
+
+use Illuminate\Database\Connection;
+
 class AbstractRepositoryTest extends \PHPUnit\Framework\TestCase
 {
+	protected Connection $db;
 
-	protected function setUp(): void {
-		// create mock for DB
-		$this->db = $this->mockConnection();
+	protected RepositoryStub $stub;
 
-		// create stub for Abstract Repository
-		$this->stub = $this	->getMockBuilder('Congraph\Core\Repositories\AbstractRepository')
-							->setConstructorArgs(array($this->db))
-							->getMockForAbstractClass();
-
-		
+	protected function setUp(): void
+	{
+		$this->db = $this->makeConnectionStub();
+		$this->stub = new RepositoryStub($this->db);
 	}
 
-	/**
-	 * @test
-	 */
 	public function testCallToUnknownMethod()
 	{
 		$this->expectException(BadMethodCallException::class);
@@ -25,9 +23,6 @@ class AbstractRepositoryTest extends \PHPUnit\Framework\TestCase
 		$this->stub->abcdefg();
 	}
 
-	/**
-	 * @test
-	 */
 	public function testTransactionMethods()
 	{
 		// defaults to null
@@ -46,79 +41,91 @@ class AbstractRepositoryTest extends \PHPUnit\Framework\TestCase
 		$this->assertNull($transactionMethods);
 	}
 
-	/**
-	 * @test
-	 */
 	public function testCallToCreateMethod()
 	{
-		$this->db 	->expects($this->once())
+		$db = $this->mockConnection();
+
+		$db 	->expects($this->once())
 					->method('beginTransaction')
 					->willReturn(true);
 
-		$this->db 	->expects($this->once())
+		$db 	->expects($this->once())
 					->method('commit')
 					->willReturn(true);
 
-		$this->stub ->expects($this->once())
+		$stub = $this->getMockBuilder(RepositoryStub::class)
+			->setConstructorArgs([$db])
+			->onlyMethods(['_create'])
+			->getMock();
+
+		$stub ->expects($this->once())
 			 		->method('_create')
 			 		->willReturn(true);
 
 		// set create as transaction method
-		$this->stub->setTransactionMethod('_create');
+		$stub->setTransactionMethod('_create');
 
-		$this->assertTrue($this->stub->create(false));
+		$this->assertTrue($stub->create(false));
 
-		$this->stub->removeTransactionMethod('_create');
+		$stub->removeTransactionMethod('_create');
 	}
 
-	/**
-	 * @test
-	 */
 	public function testCallToUpdateMethod()
 	{
-		$this->db 	->expects($this->once())
+		$db = $this->mockConnection();
+
+		$db 	->expects($this->once())
 					->method('beginTransaction')
 					->willReturn(true);
 
-		$this->db 	->expects($this->once())
+		$db 	->expects($this->once())
 					->method('commit')
 					->willReturn(true);
 
-		$this->stub ->expects($this->once())
+		$stub = $this->getMockBuilder(RepositoryStub::class)
+			->setConstructorArgs([$db])
+			->onlyMethods(['_update'])
+			->getMock();
+
+		$stub ->expects($this->once())
 			 		->method('_update')
 			 		->willReturn(true);
 
 		// set update as transaction method
-		$this->stub->setTransactionMethod('_update');
+		$stub->setTransactionMethod('_update');
 
-		$this->assertTrue($this->stub->update(1, false));
+		$this->assertTrue($stub->update(1, false));
 
-		$this->stub->removeTransactionMethod('_update');
+		$stub->removeTransactionMethod('_update');
 	}
 
-	/**
-	 * @test
-	 */
 	public function testCallToDeleteMethod()
 	{
-		$this->db 	->expects($this->once())
+		$db = $this->mockConnection();
+
+		$db 	->expects($this->once())
 					->method('beginTransaction')
 					->willReturn(true);
 
-		$this->db 	->expects($this->once())
+		$db 	->expects($this->once())
 					->method('commit')
 					->willReturn(true);
 
-		$this->stub ->expects($this->once())
+		$stub = $this->getMockBuilder(RepositoryStub::class)
+			->setConstructorArgs([$db])
+			->onlyMethods(['_delete'])
+			->getMock();
+
+		$stub ->expects($this->once())
 			 		->method('_delete')
 			 		->willReturn(true);
 
 		// set delete as transaction method
-		$this->stub->setTransactionMethod('_delete');
+		$stub->setTransactionMethod('_delete');
 
-		$this->assertTrue($this->stub->delete(false));
+		$this->assertTrue($stub->delete(false));
 
-		$this->stub->removeTransactionMethod('_delete');
+		$stub->removeTransactionMethod('_delete');
 	}
 
 
@@ -276,10 +283,18 @@ class AbstractRepositoryTest extends \PHPUnit\Framework\TestCase
 	 */
 	public function mockConnection()
 	{
-		return $this->getMockBuilder('Illuminate\Database\Connection')
+		return $this->getMockBuilder(Connection::class)
 					->disableOriginalConstructor()
-					->onlyMethods(array('beginTransaction', 'commit', 'rollback'))
+					->onlyMethods(['beginTransaction', 'commit', 'rollback'])
 					->getMock();
 	}
+
+	private function makeConnectionStub(): Connection
+	{
+		return new class extends Connection {
+			public function __construct()
+			{
+			}
+		};
+	}
 }
-?>

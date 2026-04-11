@@ -1,59 +1,80 @@
 <?php
 
-use Illuminate\Support\Facades\Cache;
-use Symfony\Component\VarDumper\VarDumper as Dumper;
+require_once __DIR__ . '/../Fixtures/Bus/DispatcherFixtures.php';
 
-class DispatcherTest extends \Orchestra\Testbench\TestCase
+use Congraph\Core\Bus\CommandDispatcher;
+use Illuminate\Contracts\Bus\Dispatcher as DispatcherContract;
+use Illuminate\Support\Facades\Event;
+
+final class DispatcherTest extends \Orchestra\Testbench\TestCase
 {
-
-	public function setUp(): void {
-		parent::setUp();
-
-		// code here
-		$this->d = new Dumper();
-	}
-
-	public function tearDown(): void {
-		// code here
-
-		parent::tearDown();
-	}
-
-		/**
-	 * Define environment setup.
-	 *
-	 * @param  \Illuminate\Foundation\Application  $app
-	 *
-	 * @return void
-	 */
-	protected function getEnvironmentSetUp($app)
-	{
-		$app['config']->set('database.default', 'testbench');
-		$app['config']->set('database.connections.testbench', [
-			'driver'   	=> 'mysql',
-			'host'      => '127.0.0.1',
-			'port'		=> '3306',
-			'database'	=> 'congraph_testbench',
-			'username'  => 'root',
-			'password'  => '',
-			'charset'   => 'utf8',
-			'collation' => 'utf8_unicode_ci',
-			'prefix'    => '',
-		]);
-
-	}
 
 	protected function getPackageProviders($app)
 	{
-		return ['Congraph\Core\CoreServiceProvider'];
+		return [\Congraph\Core\CoreServiceProvider::class];
 	}
 
 	public function testLoadingOfDispatcher()
 	{
-		fwrite(STDOUT, __METHOD__ . "\n");
+		$bus = $this->app->make(CommandDispatcher::class);
 
-		$bus = $this->app->make('Congraph\Core\Bus\CommandDispatcher');
-		$this->assertEquals('Congraph\Core\Bus\CommandDispatcher', get_class($bus));
+		$this->assertInstanceOf(CommandDispatcher::class, $bus);
+		$this->assertInstanceOf(DispatcherContract::class, $bus);
+		$this->assertTrue(method_exists($bus, 'dispatchAfterResponse'));
 	}
 
+	public function testDispatchRunsMappedValidatorBeforeHandlingCommand(): void
+	{
+		$bus = $this->app->make(CommandDispatcher::class);
+		$command = new CreateArticleCommand();
+
+		$bus->mapValidators([
+			CreateArticleCommand::class => CreateArticleValidator::class . '@validate',
+		]);
+
+		$result = $bus->dispatch($command);
+
+		$this->assertTrue($command->validated);
+		$this->assertSame('handled', $result);
+	}
+
+	public function testDispatchRunsSelfValidatingCommands(): void
+	{
+		$bus = $this->app->make(CommandDispatcher::class);
+		PublishArticleCommand::$validated = false;
+		$command = new PublishArticleCommand();
+
+		$result = $bus->dispatch($command);
+
+		$this->assertTrue(PublishArticleCommand::$validated);
+		$this->assertSame('published', $result);
+	}
+
+	public function testFallbackValidatorMapperIsUsedWhenNoDirectMappingExists(): void
+	{
+		$bus = $this->app->make(CommandDispatcher::class);
+		$command = new CreateArticleCommand();
+
+		$bus->mapValidatorsUsing(function ($mappedCommand) {
+			return CreateArticleValidator::class . '@validate';
+		});
+
+		$result = $bus->dispatch($command);
+
+		$this->assertTrue($command->validated);
+		$this->assertSame('handled', $result);
+	}
+
+	public function testDispatchFiresBeforeAndAfterEventsUsingNormalizedCommandName(): void
+	{
+		Event::fake();
+
+		$bus = $this->app->make(CommandDispatcher::class);
+		$command = new CreateArticleCommand();
+
+		$bus->dispatch($command);
+
+		Event::assertDispatched('cb.before.create.article');
+		Event::assertDispatched('cb.after.create.article');
+	}
 }

@@ -10,6 +10,7 @@
 
 namespace Congraph\Core\Repositories;
 
+use Congraph\Core\Exceptions\BadRequestException;
 use Illuminate\Database\Connection;
 use Congraph\Contracts\Core\RepositoryContract;
 use Illuminate\Support\Facades\Cache;

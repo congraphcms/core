@@ -154,11 +154,15 @@ trait MapperTrait
 
         if(class_exists($resolver))
         {
-        	$instance = $this->container->make($resolver, $parameters);
-		    if($instance instanceof Command)
-		    {
+        	if (is_subclass_of($resolver, Command::class)) {
+        		$instance = array_is_list($parameters)
+        			? (new \ReflectionClass($resolver))->newInstanceArgs($parameters)
+        			: $this->container->make($resolver, $parameters);
+
 		    	return Bus::dispatch($instance, $parameters);
 		    }
+
+        	$instance = $this->container->make($resolver);
 
 		    if(is_callable([$instance, $method]))
 		    {
@@ -168,7 +172,7 @@ trait MapperTrait
 
         if(strpos($resolver, '@') !== false)
         {
-        	list($class, $method) = explode('@', $this->action['uses']);
+        	list($class, $method) = explode('@', $resolver, 2);
 
         	if (!method_exists($instance = $this->container->make($class), $method)) {
 		        throw new Exception('Invalid method mapped on object: ' . $class . '.');

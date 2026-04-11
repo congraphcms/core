@@ -554,7 +554,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * @param  string $value
 	 * @return mixed
 	 */
-	public function offsetSet($offset, $value)
+	public function offsetSet(mixed $offset, mixed $value): void
 	{
 		if (is_null($offset))
 		{
@@ -584,7 +584,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * 
 	 * @return boolean
 	 */
-	public function offsetExists($offset) {
+	public function offsetExists(mixed $offset): bool {
 		return ($this->isCollection)?
 				 isset($this->data[$offset])
 				:isset($this->data->{$offset});
@@ -597,7 +597,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * 
 	 * @return boolean
 	 */
-	public function offsetUnset($offset) {
+	public function offsetUnset(mixed $offset): void {
 		if($this->isCollection)
 		{
 			unset($this->data[$offset]);
@@ -615,7 +615,7 @@ abstract class DataTransferObject implements ArrayAccess, Arrayable, Jsonable
 	 * 
 	 * @return boolean
 	 */
-	public function offsetGet($offset)
+	public function offsetGet(mixed $offset): mixed
 	{
 		if($this->isCollection)
 		{
